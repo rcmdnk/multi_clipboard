@@ -79,15 +79,15 @@ Or, simply download scripts and set where you like.
     
     ----------.screenrc---------
     bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
-    bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboards -I'
-    bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboards -I'
-    bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboards -I'
-    bind a eval 'command -c mc' "!bash -c 'multi_clipboards -S'"
-    bind ^a eval 'command -c mc' "!bash -c 'multi_clipboards -S'"
-    bind -c mc n eval 'command -c mc' "!bash -c 'multi_clipboards -S -n'"
-    bind -c mc p eval 'command -c mc' "!bash -c 'multi_clipboards -S -p'"
-    bind -c mc q eval "!bash -c 'multi_clipboards -S -q'"
-    bind -c mc ' ' eval "!bash -c 'multi_clipboards -S -s'"
+    bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
+    bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
+    bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
+    bind a eval 'command -c mc' "!bash -c 'multi_clipboard -S'"
+    bind ^a eval 'command -c mc' "!bash -c 'multi_clipboard -S'"
+    bind -c mc n eval 'command -c mc' "!bash -c 'multi_clipboard -S -n'"
+    bind -c mc p eval 'command -c mc' "!bash -c 'multi_clipboard -S -p'"
+    bind -c mc q eval "!bash -c 'multi_clipboard -S -q'"
+    bind -c mc ' ' eval "!bash -c 'multi_clipboard -S -s'"
     ----------.screenrc---------
 
     These settings enable that a clipboard copied by SPACE, Y and  W
@@ -95,7 +95,7 @@ Or, simply download scripts and set where you like.
     If CLX is set, it is also sent to the OS's (X server's) clipboard.
 
     C-a a (C-a) can be used to select a clipboard from the list,
-    instead of using multi_clipboards -O.
+    instead of using multi_clipboard -O.
     Once you input C-a a, current clipboard is shown in the message line like:
 
         0: current_clipboard
@@ -139,15 +139,11 @@ Or, simply download scripts and set where you like.
              In the later case, /tmp/screen-exchange will be used.
 
     Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
-             because multi_clipboards temporally change it to 0.
-             Default value in both screen and multi_clipboards is 1.
+             because multi_clipboard temporally change it to 0.
+             Default value in both screen and multi_clipboard is 1.
              Therefore, you don't need to set SCREEN_MSGMINWAIT
              unless you set msgminwait in .screenrc.
 
 # References
 
 * [GNU screenでクリップボードの履歴を使えるようにする](http://rcmdnk.github.io/blog/2013/03/24/screen-bash/)
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rcmdnk/multi_clipboards/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
