@@ -219,7 +219,16 @@ function mcpop { # {{{
   local i=$((nclbs-1))
   echo
   while [ $i -ge 0 ];do
-    local clbshow=`echo "${clbs[$i]}" |perl -pe 's/\n/\a/g' |perl -pe 's/\a/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'`
+    if [ $(echo "${clbs[$i]}"|wc -l) -ge 3 ];then
+      local clbshow="$(echo "${clbs[$i]}"|head -n2)
+..."
+    else
+      local clbshow="${clbs[$i]}"
+    fi
+    # %%/\\ is reduced to %/\ during the conversions
+    # \e\" makes problem (stop the output), then \ must be conveted to the output
+    # `\\` is converted to one \ for the real clipboard, too, to be fixed.
+    local clbshow=$(echo "$clbshow" |perl -pe 's/\n/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'|perl -pe 's/\\/\\\\/g')
     printf "%2d: $clbshow\n" $((i+1))
     ((i--))
   done
@@ -233,11 +242,16 @@ function mcpop { # {{{
   # Choose buffer
   printf "\nchoose buffer: "
   read n
-  if ! echo $n|grep -q "^[0-9]\+$" || [ "$n" -ge "$nclbs" ];then
+  if [ "$n" = "q" ];then
+    return 0
+  fi
+  if ! echo $n|grep -q "^[1-9][0-9]*$" || [ "$n" -gt "$nclbs" ];then
     echo "$f is not valid"
-    echo "Use mcpop [0-$((nclbs-1))]"
+    echo "Enter [1-$((nclbs))] or q (to quit)"
     return 1
   fi
+  # Subtract one to adjust for the array
+  ((n--))
   local c="${clbs[$n]}"
 
   # Align clipboards
@@ -258,9 +272,11 @@ function mcpop { # {{{
 
 function mcpoponsc_messaage { # {{{
   screen -X msgminwait 0
-  local clbshow=`echo "${mcpoponsc_clbs[$((mcpoponsc_n-1))]}" |perl -pe 's/\n/\a/g' |perl -pe 's/\a/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'`
+  # Note: Message line can show only 512 characters.
+  # If more than 512 characters were given to the message line,
+  # the message can't be correctly shown (and overflows will appear in the window)
   #printf "\e^n/p(next/prev) q(quit) Space(select) %2d: $clbshow\e\\" $mcpoponsc_n
-  printf "\e^%d/${#mcpoponsc_clbs[@]}: $clbshow\e\\" $mcpoponsc_n
+  printf "\e^%d/${#mcpoponsc_clbs[@]}: ${mcpoponsc_clbs[$((mcpoponsc_n-1))]: 0: 100}\e\\" $mcpoponsc_n
   screen -X msgminwait $msgminwait
 } # }}}
 
