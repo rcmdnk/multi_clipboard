@@ -129,7 +129,6 @@ max=${CLMAXHIST:-10}
 # other than when "-x" is given
 clx=${CLX:-""}
 
-
 # Application to sent the clipboard to the OS's clipboard
 # to be used for "-x" option
 if [ "$CLXOS" != "" ];then
