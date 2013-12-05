@@ -129,6 +129,7 @@ max=${CLMAXHIST:-10}
 # other than when "-x" is given
 clx=${CLX:-""}
 
+
 # Application to sent the clipboard to the OS's clipboard
 # to be used for "-x" option
 if [ "$CLXOS" != "" ];then
@@ -219,7 +220,7 @@ function mcpop { # {{{
   echo
   while [ $i -ge 0 ];do
     local clbshow=`echo "${clbs[$i]}" |perl -pe 's/\n/\a/g' |perl -pe 's/\a/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'`
-    printf "%2d: $clbshow\n" $i
+    printf "%2d: $clbshow\n" $((i+1))
     ((i--))
   done
 
@@ -256,9 +257,11 @@ function mcpop { # {{{
 } # }}}
 
 function mcpoponsc_messaage { # {{{
-  local clbshow=`echo "${mcpoponsc_clbs[$mcpoponsc_n]}" |perl -pe 's/\n/\a/g' |perl -pe 's/\a/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'`
+  screen -X msgminwait 0
+  local clbshow=`echo "${mcpoponsc_clbs[$((mcpoponsc_n-1))]}" |perl -pe 's/\n/\a/g' |perl -pe 's/\a/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'`
   #printf "\e^n/p(next/prev) q(quit) Space(select) %2d: $clbshow\e\\" $mcpoponsc_n
-  printf "\e^%d: $clbshow\e\\" $mcpoponsc_n
+  printf "\e^%d/${#mcpoponsc_clbs[@]}: $clbshow\e\\" $mcpoponsc_n
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc { # {{{
@@ -275,8 +278,12 @@ function mcpoponsc { # {{{
     return
   fi
 
-  mcpoponsc_n=0
-  screen -X setenv mcpoponsc_n $mcpoponsc_n
+  # mcpoponsc_n starts from 1
+  # It is better to use same number for pringing in mcpoponsc_messaage,
+  # because setenv command also show a message in a short time.
+  # If they are different, there will be ugly flash.
+  mcpoponsc_n=1
+  screen -X setenv mcpoponsc_n $((mcpoponsc_n+1))
   mcpoponsc_messaage
 } # }}}
 
@@ -289,8 +296,8 @@ function mcpoponsc_next { # {{{
   local mcpoponsc_nclbs=${#mcpoponsc_clbs[*]}
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  if [ $mcpoponsc_n -eq $((mcpoponsc_nclbs-1)) ];then
-    mcpoponsc_n=0
+  if [ $mcpoponsc_n -eq $((mcpoponsc_nclbs)) ];then
+    mcpoponsc_n=1
   else
     ((mcpoponsc_n++))
   fi
@@ -307,8 +314,8 @@ function mcpoponsc_prev { # {{{
   local mcpoponsc_nclbs=${#mcpoponsc_clbs[*]}
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  if [ $mcpoponsc_n -eq 0 ];then
-    mcpoponsc_n=$((mcpoponsc_nclbs-1))
+  if [ $mcpoponsc_n -eq 1 ];then
+    mcpoponsc_n=$((mcpoponsc_nclbs))
   else
     ((mcpoponsc_n--))
   fi
@@ -329,7 +336,7 @@ function mcpoponsc_select { # {{{
   local mcpoponsc_nclbs=${#mcpoponsc_clbs[*]}
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  local n=$mcpoponsc_n
+  local n=$((mcpoponsc_n-1))
   local c="${mcpoponsc_clbs[$n]}"
 
   # Align clipboards
