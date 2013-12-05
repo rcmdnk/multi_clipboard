@@ -298,7 +298,7 @@ function mcpoponsc { # {{{
   # because setenv command also show a message in a short time.
   # If they are different, there will be ugly flash.
   mcpoponsc_n=1
-  screen -X setenv mcpoponsc_n $((mcpoponsc_n+1))
+  screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
 } # }}}
 
