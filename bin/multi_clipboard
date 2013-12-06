@@ -380,6 +380,7 @@ function mcpoponsc_select { # {{{
 } # }}}
 
 function mcpopsc { # {{{
+  screen -X msgminwait 0
   local orig_ifs=$IFS
   IFS="$cls"
   local clbs=(`cat $clb`)
@@ -387,6 +388,7 @@ function mcpopsc { # {{{
   echo -en "${clbs[0]}" > $scex
   screen -X readbuf
   printf "\e^Clipbaord: ${clbs[0]: 0:100}\e\\"
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpushx { # {{{
