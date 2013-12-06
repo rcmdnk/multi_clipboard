@@ -311,10 +311,10 @@ function mcpoponsc_next { # {{{
   local mcpoponsc_nclbs=${#mcpoponsc_clbs[*]}
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  if [ $mcpoponsc_n -eq $((mcpoponsc_nclbs)) ];then
-    mcpoponsc_n=1
+  if [ $mcpoponsc_n -eq 1 ];then
+    mcpoponsc_n=$((mcpoponsc_nclbs))
   else
-    ((mcpoponsc_n++))
+    ((mcpoponsc_n--))
   fi
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
@@ -329,10 +329,10 @@ function mcpoponsc_prev { # {{{
   local mcpoponsc_nclbs=${#mcpoponsc_clbs[*]}
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  if [ $mcpoponsc_n -eq 1 ];then
-    mcpoponsc_n=$((mcpoponsc_nclbs))
+  if [ $mcpoponsc_n -eq $((mcpoponsc_nclbs)) ];then
+    mcpoponsc_n=1
   else
-    ((mcpoponsc_n--))
+    ((mcpoponsc_n++))
   fi
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
