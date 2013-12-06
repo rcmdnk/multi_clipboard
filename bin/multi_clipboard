@@ -270,16 +270,15 @@ function mcpop { # {{{
 } # }}}
 
 function mcpoponsc_messaage { # {{{
-  screen -X msgminwait 0
   # Note: Message line can show only 512 characters.
   # If more than 512 characters were given to the message line,
   # the message can't be correctly shown (and overflows will appear in the window)
   #printf "\e^n/p(next/prev) q(quit) Space(select) %2d: $clbshow\e\\" $mcpoponsc_n
   printf "\e^%d/${#mcpoponsc_clbs[@]}: ${mcpoponsc_clbs[$((mcpoponsc_n-1))]: 0: 100}\e\\" $mcpoponsc_n
-  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc { # {{{
+  screen -X msgminwait 0
   ## Get stored words
   local orig_ifs=$IFS
   IFS="$cls"
@@ -300,9 +299,11 @@ function mcpoponsc { # {{{
   mcpoponsc_n=1
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_next { # {{{
+  screen -X msgminwait 0
   ## Get stored words
   local orig_ifs=$IFS
   IFS="$cls"
@@ -318,9 +319,11 @@ function mcpoponsc_next { # {{{
   fi
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_prev { # {{{
+  screen -X msgminwait 0
   ## Get stored words
   local orig_ifs=$IFS
   IFS="$cls"
@@ -336,6 +339,7 @@ function mcpoponsc_prev { # {{{
   fi
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_quit { # {{{
@@ -343,6 +347,7 @@ function mcpoponsc_quit { # {{{
 } # }}}
 
 function mcpoponsc_select { # {{{
+  screen -X msgminwait 0
   ## Get stored words
   local orig_ifs=$IFS
   IFS="$cls"
@@ -369,9 +374,8 @@ function mcpoponsc_select { # {{{
     echo -en "$c" | $clx
   fi
 
-  screen -X msgminwait 0
-  mcpopsc
   mcpoponsc_quit
+  mcpopsc
   screen -X msgminwait $msgminwait
 } # }}}
 
@@ -382,7 +386,7 @@ function mcpopsc { # {{{
   IFS=$orig_ifs
   echo -en "${clbs[0]}" > $scex
   screen -X readbuf
-  printf "\e^${clbs[0]}\e\\"
+  printf "\e^Clipbaord: ${clbs[0]: 0:100}\e\\"
 } # }}}
 
 function mcpushx { # {{{
