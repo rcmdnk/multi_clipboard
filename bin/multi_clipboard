@@ -377,12 +377,13 @@ function mcpoponsc_select { # {{{
     echo -en "$c" | $clx
   fi
 
-  mcpopsc
   mcpoponsc_quit
+  mcpopsc
   screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpopsc { # {{{
+  screen -X msgminwait 0
   local orig_ifs=$IFS
   IFS="$cls"
   local clbs=(`cat $clb`)
@@ -390,6 +391,7 @@ function mcpopsc { # {{{
   echo -en "${clbs[0]}" > $scex
   screen -X readbuf
   printf "\e^${clbs[0]}\e\\"
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpushx { # {{{
