@@ -390,7 +390,7 @@ function mcpopsc { # {{{
   IFS=$orig_ifs
   echo -en "${clbs[0]}" > $scex
   screen -X readbuf
-  printf "\e^${clbs[0]}\e\\"
+  printf "\e^Clipbaord: ${clbs[0]: 0:100}\e\\"
   screen -X msgminwait $msgminwait
 } # }}}
 
