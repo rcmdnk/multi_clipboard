@@ -294,12 +294,11 @@ function mcpoponsc { # {{{
 
   screen -X setenv mcpoponsc_nclbs $mcpoponsc_nclbs
   for ((i=0;i<$mcpoponsc_nclbs;i++));do
+    local clbshow="${mcpoponsc_clbs[$i]: 0: 100}"
     if [ ${#mcpoponsc_clbs[$i]} -gt 100 ];then
-      local clbshow=${mcpoponsc_clbs[$i]: 0: 100}...
-    else
-      local clbshow=${mcpoponsc_clbs[$i]}
+      clbshow="${clbshow}..."
     fi
-    screen -X setenv mcpoponsc_clb_$i $clbshow
+    screen -X setenv "mcpoponsc_clb_${i}" "$clbshow"
   done
 
   # mcpoponsc_n starts from 1
