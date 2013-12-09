@@ -201,3 +201,5 @@ Other command line usages are here:
 * [GNU screenでクリップボードの履歴を使えるようにする](http://rcmdnk.github.io/blog/2013/03/24/screen-bash/)
 
 * [GNU screenでクリップボードの履歴を使えるようにする 2](http://rcmdnk.github.io/blog/2013/12/04/computer-screen/)
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rcmdnk/multi_clipboards/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
