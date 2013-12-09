@@ -63,6 +63,9 @@ Add following lines to `.screenrc`
 `SCREENEXCHANGE` is defined in `.bashrc` (see below)
 to tell the bufferfile to multi_clipboard.
 
+If you don't set it in `.bashrc`, don't write it in `.screenrc`.
+In this case, default file `/tmp/screen-exchange` will be used.
+
 Bindkeys overwrite copy commands in copy mode.
 With space/Y/W, it automatically put new clipboard to the clipboards of multi_clipboard.
 
@@ -108,9 +111,6 @@ Add following lines to `.bashrc`.
         export CLXOS="pbcopy"
       fi
     fi
-
-At least SCREENEXCHANGE is necessary to use multi_clipboard.
-Others are options.
 
 Note 1): SCREENEXCHANGE must be set in .bashrc
          or you must remove the bufferfile definition line from .screenrc
