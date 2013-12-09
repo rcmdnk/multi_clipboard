@@ -156,6 +156,9 @@ Please see the demo.
 
 ![multi_clipboard demo](http://rcmdnk.github.io/images/post/20131204_multi_clipboard.gif)
 
+Example for selection window is available in asciinema:
+
+* [Selection window demo of multi_clipboard](http://asciinema.org/a/6695)
 
 
 Other command line usages are here:
