@@ -418,6 +418,9 @@ function mcpopwindow_exit { # {{{
 
   # Show cursor
   tput cnorm
+
+  # Enable echo input
+  #stty echo
 } # }}}
 
 function mcpopwindow_printline () { # is_select row n_clb
@@ -469,6 +472,10 @@ function mcpopwindow { # {{{
 
   # Hide cursor
   tput civis
+
+  # Hide any input (need to cleanup a print, especially when re-draw with printall.)
+  # it doesn't work well...
+  #stty echo
 
   # Set variables
   header=" $nclbs clipboards in total
