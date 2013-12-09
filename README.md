@@ -46,10 +46,17 @@ Or, simply download scripts and set where you like.
 
 Add following lines to `.screenrc`
 
+    # Screen exchange file
     bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
+    
+    # Overwrite keys in copy mode
     bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
+    
+    # Selection mode
+    # C-a a : default is meta (Send the command character (C-a) to window.)
+    # C-a C-a : default is other (Toggle the window displayed previously.)
     bind a eval 'command -c mc' 'exec multi_clipboard -S'
     bind ^a eval 'command -c mc' 'exec multi_clipboard -S'
     bind -c mc n eval 'command -c mc' 'exec multi_clipboard -S -n'
@@ -59,15 +66,21 @@ Add following lines to `.screenrc`
     bind -c mc q eval 'exec multi_clipboard -S -q'
     bind -c mc ^q eval 'exec multi_clipboard -S -q'
     bind -c mc ' ' eval 'exec multi_clipboard -S -s'
+    
+    # Launch selection window
+    # C-a q : default is xon (Send a control-q to the current window.)
+    bind q screen -t multi_clipboard -p - multi_clipboard -W
 
 `SCREENEXCHANGE` is defined in `.bashrc` (see below)
 to tell the bufferfile to multi_clipboard.
 
+If you don't set it in `.bashrc`, don't write it in `.screenrc`.
+In this case, default file `/tmp/screen-exchange` will be used.
+
 Bindkeys overwrite copy commands in copy mode.
 With space/Y/W, it automatically put new clipboard to the clipboards of multi_clipboard.
 
-Other settings are for `selection mode` of multi_clipboard.
-(please change first `a` command as you like.)
+`selection mode` is started by `a`. (please change it as you like.)
 
 In screen, you can start `selection mode` with `C-a a` or `C-a C-a`.
 Then the first clipboard will appear in the message line of screen.
@@ -78,6 +91,8 @@ Finally, choose the clipboard by Space.
 
 Use `q` to stop the mode.
 
+`q` will launch selection window in the new window.
+You can choose clipboard by j/k and select by Enter.
 
 ## Setup in .bashrc
 
@@ -108,9 +123,6 @@ Add following lines to `.bashrc`.
         export CLXOS="pbcopy"
       fi
     fi
-
-At least SCREENEXCHANGE is necessary to use multi_clipboard.
-Others are options.
 
 Note 1): SCREENEXCHANGE must be set in .bashrc
          or you must remove the bufferfile definition line from .screenrc
@@ -148,34 +160,38 @@ Please see the demo.
 
 Other command line usages are here:
 
-    These settings enable that a clipboard copied by SPACE, Y and  W
-    Multi clipboard manager for GNU screen!
-    *** Utility to keep multiple clipboard ***
-    *** and manage screen's clipboard.      ***
-    
     $ multi_clipboard -i [args]
     # Push [args]to the clipboard list
-    
+
     $ multi_clipboard -I
     # Push the screen's clipboard to the clipboard list
-    
+
     $ multi_clipboard -o
     # Will show the clipboard list, then select one, which will be placed
     # the top of the clipboard list.
-    
-    $ multi_clipboard -O # (or w/o any other options)
-    # Same as -o, in addition, sent it to the screen's clipboard
-    
+
+    $ multi_clipboard -O
+    # Same as -o, in addition, send it to the screen's clipboard
+
     $ multi_clipboard -s [args]
     # Send [args] to the screen's clipboard
-    
+
+    $ multi_clipboard -S
+    # Use in screen for selection mode.
+
+    $ multi_clipboard -w # or w/o any other options
+    # Launch selection window
+
+    $ multi_clipboard -W
+    # Same as -w, in addition, send it to the screen's clipboard
+
     $ multi_clipboard -x
     # Send the last clipboard to the clipboard of OS (X server)
     # Even if CLX is not set, it uses CLXOS, is available
-    
+
     $ multi_clipboard -c
     # Clean up clipboard file
-    
+
     $ multi_clipboard -h
     # Show this usage
     
