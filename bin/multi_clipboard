@@ -417,7 +417,7 @@ function mcpopwindow_exit { # {{{
 
   # Show cursor
   tput cnorm
-  tput vs # For FreeBSD
+  #tput vs # For FreeBSD
 
   # Enable echo input
   stty echo
@@ -472,7 +472,7 @@ function mcpopwindow { # {{{
 
   # Hide cursor
   tput civis
-  tput vi # For FreeBSD
+  #tput vi # For FreeBSD
 
   # Hide any input (need to cleanup a print, especially when re-draw with printall.)
   stty -echo
