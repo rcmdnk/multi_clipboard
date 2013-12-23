@@ -326,7 +326,7 @@ function mcpoponsc_messaage { # {{{
 
 function mcpoponsc { # {{{
   screen -X msgminwait 0
-  ## Get stored words
+  # Get stored words
   mcgetcls
 
   # Check a number of clipboards
@@ -337,10 +337,9 @@ function mcpoponsc { # {{{
 
   screen -X setenv nclbs $nclbs
   for ((i=0;i<$nclbs;i++));do
-    local clbshow="${clbs[$i]: 0: 100}"
-    if [ ${#clbs[$i]} -gt 100 ];then
-      clbshow="${clbshow}..."
-    fi
+    # screen's command must be less than 512 in total, including setenv ....
+    # Therefore stored value should be much shorter 512.
+    local clbshow="${clbs[$i]: 0: 480}"
     screen -X setenv "clb_${i}" "$clbshow"
   done
 
@@ -543,7 +542,7 @@ function mcpopsc { # {{{
   mcgetcls
   echo -en "${clbs[0]}" > $scex
   screen -X readbuf
-  printf "\e^Clipbaord: ${clbs[0]: 0:100}\e\\"
+  printf "\e^Clipbaord: ${clbs[0]: 0:480}\e\\"
   screen -X msgminwait $msgminwait
 } # }}}
 
