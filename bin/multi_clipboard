@@ -415,14 +415,16 @@ function mcpopwindow_exit { # {{{
   clear
 
   # Show cursor
-  tput cnorm
-  #tput vs # For FreeBSD
+  tput cnorm 2>/dev/null || tput vs 2>/dev/null
+
+  # Restore display
+  tput rmcup 2>/dev/null || tput te 2>/dev/null
 
   # Enable echo input
   stty echo
 } # }}}
 
-function mcpopwindow_printline () { # is_select row n_clb
+function mcpopwindow_printline () { # is_select row n_clb {{{
   local clbshow="$(echo ${clbs[$3]}|tr '\n' ' ')"
   tput cup $(($2)) 0
   if [ $1 -eq 1 ];then
@@ -431,9 +433,9 @@ function mcpopwindow_printline () { # is_select row n_clb
     printf "%3d: ${clbshow: 0: $((cols-5))}" $(($3+1))
   fi
   tput cup $(($2)) 0
-}
+} # }}}
 
-function mcpopwindow_printall () {
+function mcpopwindow_printall () { # {{{
   local offset=0
   local select=0
   if [ $# -gt 0 ];then
@@ -455,7 +457,7 @@ function mcpopwindow_printall () {
       mcpopwindow_printline 0 $((i+ext_row)) $((i+offset))
     fi
   done
-}
+} # }}}
 
 function mcpopwindow { # {{{
   mcgetcls
@@ -470,8 +472,10 @@ function mcpopwindow { # {{{
   trap mcpopwindow_exit 0
 
   # Hide cursor
-  tput civis
-  #tput vi # For FreeBSD
+  tput civis 2>/dev/null || tput vi 2>/dev/null
+
+  # Save current display
+  tput smcup 2>/dev/null || tput ti 2>/dev/null
 
   # Hide any input (need to cleanup a print, especially when re-draw with printall.)
   stty -echo
@@ -610,6 +614,5 @@ elif [ "$1" = "-W" ];then
   mcpopsc
 else # -w or else
   # mcpopwindow
-  shift
   mcpopwindow
 fi # }}}
