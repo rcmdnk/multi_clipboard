@@ -98,12 +98,19 @@ Then the first clipboard will appear in the message line of screen.
 
 You can change the candidate to next/previous by `n`(`C-n`)/`p`(`C-p`).
 
-Finally, choose the clipboard by Space.
+Finally, choose the clipboard by `Space`.
 
 Use `q` to stop the mode.
 
+
 `q` will launch selection window in the new window.
-You can choose clipboard by j/k and select by Enter.
+You can choose clipboard by `j`/`k` and select by `Return`.
+
+In this window, you can delete clipboard by `d`.
+In addition, you can put the clipboard to snippet by `s`.
+(see below Snippet's section.)
+
+
 
 ## Setup in .bashrc
 
@@ -210,10 +217,26 @@ Other command line usages are here:
     # Show this usage
     
 
+# Snippet
+
+You can use multi_clipboard as snippet manager in addition to clipboard manager.
+
+The default snippet file is `$HOME/.mcsnippet`.
+You can change is with `MCSNIPPET` variables in .bashrc like:
+
+    export MCSNIPPET=$HOME/snippets/my_snippet
+
+To use this list, give `snippet` command as a first argument.
+Other usage is same as clipboard.
+
+You can put clipboard to snippet from selection window of clipboard
+(push `s` on the clipboard which you want to put into snippet).
+
+
 # References
 
 * [GNU screenでクリップボードの履歴を使えるようにする](http://rcmdnk.github.io/blog/2013/03/24/screen-bash/)
-
 * [GNU screenでクリップボードの履歴を使えるようにする 2](http://rcmdnk.github.io/blog/2013/12/04/computer-screen/)
+* [GNU screenでクリップボードの履歴を使えるようにする 3](http://rcmdnk.github.io/blog/2013/12/10/computer-screen/)
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rcmdnk/multi_clipboards/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
