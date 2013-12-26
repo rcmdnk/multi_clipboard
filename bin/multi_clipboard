@@ -173,7 +173,7 @@ scex=${SCREENEXCHANGE:-/tmp/screen-exchange}
 touch $scex
 
 # Max number of clipboards to keep
-max=${CLMAXHIST:-10}
+max=${CLMAXHIST:-20}
 
 # Application to sent the clipboard to the OS's clipboard
 # If blank, don't copy the clipboard to the OS's clipboard
