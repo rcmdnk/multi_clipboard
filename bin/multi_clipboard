@@ -225,7 +225,7 @@ function mcgetcls { # {{{
   IFS="$cls"
   clbs=(`cat $clb`)
   IFS=$orig_ifs
-  nclbs=${#clbs[*]}
+  nclbs=${#clbs[@]}
 } # }}}
 
 function mcaligncls { # {{{
@@ -237,6 +237,16 @@ function mcaligncls { # {{{
       echo -en "${clbs[$i]}$cls" >> $clb
     fi
   done
+} # }}}
+
+function mcdelete { # {{{
+  local n=${1:-$((${#clbs[@]}-1))}
+  unset clbs[$n]
+  rm -f $clb
+  for c in "${clbs[@]}";do
+    echo -en "$c$cls" >> $clb
+  done
+  mcgetcls
 } # }}}
 
 function mcpush { # {{{
@@ -332,6 +342,7 @@ function mcpoponsc { # {{{
   # Check a number of clipboards
   if [ $nclbs -eq 0 ];then
     printf "\eNo clipboards in $clb\e\\"
+    sleep 1
     return
   fi
 
@@ -463,12 +474,27 @@ function mcpopwindow_printall () { # {{{
   done
 } # }}}
 
+function mcpopwindow_setheader () { # {{{
+  # Set variables
+  header=" $nclbs clipboards in total
+  j(down), k(up), d(delete), Enter(select), q(exit)
+"
+  ext_row=$(echo "$header"|wc -l)
+  lines=$(tput lines)
+  cols=$(tput cols)
+  max_show=$nclbs
+  if [ $nclbs -gt $((lines-ext_row)) ];then
+    max_show=$((lines-ext_row))
+  fi
+} # }}}
+
 function mcpopwindow { # {{{
   mcgetcls
 
   # Check a number of clipboards
   if [ $nclbs -eq 0 ];then
     printf "No clipboards in $clb\n\n"
+    sleep 1
     return
   fi
 
@@ -484,19 +510,8 @@ function mcpopwindow { # {{{
   # Hide any input (need to cleanup a print, especially when re-draw with printall.)
   stty -echo
 
-  # Set variables
-  header=" $nclbs clipboards in total
- j(down), k(up), Enter(select), q(exit)
-"
-  ext_row=$(echo "$header"|wc -l)
-  lines=$(tput lines)
-  cols=$(tput cols)
-  max_show=$nclbs
-  if [ $nclbs -gt $((lines-ext_row)) ];then
-    max_show=$((lines-ext_row))
-  fi
-
   # First view
+  mcpopwindow_setheader
   mcpopwindow_printall
 
   # Select clipboard
@@ -513,7 +528,7 @@ function mcpopwindow { # {{{
           continue
         elif [ $cursor_r -eq $((lines-1)) ];then
           ((n_offset++));((n++))
-          mcpopwindow_printall $((n-lines+1+ext_row)) $((n)) $n_offset
+          mcpopwindow_printall $n_offset $n
         else
           mcpopwindow_printline 0 $((cursor_r)) $n
           ((cursor_r++));((n++))
@@ -527,10 +542,29 @@ function mcpopwindow { # {{{
           mcpopwindow_printline 1 $((cursor_r)) $n
         elif [ $n_offset -gt 0 ];then
           ((n_offset--));((n--))
-          mcpopwindow_printall $n $n $n_offset
+          mcpopwindow_printall $n_offset $n
         else
           continue
         fi
+        ;;
+      "d" )
+        mcdelete $n
+        # Check a number of clipboards
+        if [ $nclbs -eq 0 ];then
+          clear
+          printf "No clipboards in $clb\n\n"
+          sleep 1
+          return 0
+        fi
+        if [ $n -eq $nclbs ];then
+          if [ $n_offset -gt 0 ];then
+            ((n_offset--));((n--))
+          else
+            ((cursor_r--));((n--))
+          fi
+        fi
+        mcpopwindow_setheader
+        mcpopwindow_printall $n_offset $n
         ;;
       "q" ) return 0;;
       ""  ) break;;
