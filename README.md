@@ -49,24 +49,35 @@ Add following lines to `.screenrc`
     # Screen exchange file
     bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
     
+
     # Overwrite keys in copy mode
     bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
     
+
     # Selection mode
     # C-a a : default is meta (Send the command character (C-a) to window.)
     # C-a C-a : default is other (Toggle the window displayed previously.)
     bind a eval 'command -c mc' 'exec multi_clipboard -S'
     bind ^a eval 'command -c mc' 'exec multi_clipboard -S'
+
+    # Next
     bind -c mc n eval 'command -c mc' 'exec multi_clipboard -S -n'
     bind -c mc ^n eval 'command -c mc' 'exec multi_clipboard -S -n'
+
+    # Previous
     bind -c mc p eval 'command -c mc' 'exec multi_clipboard -S -p'
     bind -c mc ^p eval 'command -c mc' 'exec multi_clipboard -S -p'
+
+    # Quit
     bind -c mc q eval 'exec multi_clipboard -S -q'
     bind -c mc ^q eval 'exec multi_clipboard -S -q'
+
+    # Choose and Quit
     bind -c mc ' ' eval 'exec multi_clipboard -S -s'
     
+
     # Launch selection window
     # C-a q : default is xon (Send a control-q to the current window.)
     bind q screen -t multi_clipboard -p - multi_clipboard -W
