@@ -5,6 +5,21 @@ Clipboard manager for GNU screen.
 
 # Installation
 
+## curl
+
+You can use an install script on the web like:
+
+    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh| sh
+
+This will install scripts to `/usr/bin`
+and you may be asked root password.
+
+If you want to install other directory, do like:
+
+    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh|  prefix=~/usr/local/ sh
+
+## Homebrew at OS X
+
 On Mac, you can install scripts by [Homebrew](https://github.com/mxcl/homebrew):
 
     $ brew tap rcmdnk/rcmdnkpac
@@ -26,16 +41,7 @@ Or if you write like:
 and do `brewall install`, you will have all useful scripts in
 [rcmdnkpac](https://github.com/rcmdnk/homebrew-rcmdnkpac).
 
-You can also use an install script on the web like:
-
-    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh| sh
-
-This will install scripts to `/usr/bin`
-and you may be asked root password.
-
-If you want to install other directory, do like:
-
-    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh|  prefix=~/usr/local/ sh
+## Download
 
 Or, simply download scripts and set where you like.
 
