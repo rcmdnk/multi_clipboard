@@ -65,6 +65,9 @@ Usage:
   $ multi_clipboard -c
   # Clean up clipboard file
 
+  $ multi_clipboard snippet [option]
+  # Use 'snippet' file instead of saved clipboards.
+
   $ multi_clipboard -h
   # Show this usage
 "
