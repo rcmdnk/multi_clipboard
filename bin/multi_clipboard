@@ -255,7 +255,7 @@ function mcgetcls { # {{{
 function mcaligncls { # {{{
   local n=${1:-0}
   # Don't align for snippet
-  if [ is_clb=0 ];then
+  if [ $is_clb -eq 0 ];then
     n=0
   fi
   local c="${clbs[$n]}"
@@ -353,6 +353,15 @@ function mcpop { # {{{
 
   # Copy to clipboard of X
   mccopy2cl "${clbs[$n]}"
+} # }}}
+
+function mcpopsc { # {{{
+  screen -X msgminwait 0
+  mcgetcls
+  echo -en "${clbs[0]}" > $scex
+  screen -X readbuf
+  printf "\e^Clipbaord: ${clbs[0]: 0:480}\e\\"
+  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_messaage { # {{{
@@ -624,15 +633,6 @@ function mcpopwindow { # {{{
   # Copy to clipboard of X
   mccopy2cl "${clbs[$n]}"
 
-} # }}}
-
-function mcpopsc { # {{{
-  screen -X msgminwait 0
-  mcgetcls
-  echo -en "${clbs[0]}" > $scex
-  screen -X readbuf
-  printf "\e^Clipbaord: ${clbs[0]: 0:480}\e\\"
-  screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpushx { # {{{
