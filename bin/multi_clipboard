@@ -432,10 +432,10 @@ function mcpoponsc_prev { # {{{
 
 function mcpoponsc_quit { # {{{
   screen -X msgminwait 0
-  for ((i=0; i<$(screen -Q echo '$nclbs'); i++));do
+  local nclbs=$(screen -Q echo '$nclbs')
+  for ((i=0; i<$nclbs; i++));do
     screen -X unsetenv clb_$i
   done
-  screen -X echo ""
   screen -X unsetenv mcpoponsc_n
   screen -X unsetenv nclbs
   screen -X msgminwait $msgminwait
@@ -447,12 +447,12 @@ function mcpoponsc_select { # {{{
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
   local n=$((mcpoponsc_n-1))
-
   # Align clipboards
   mcaligncls $n
 
   # Copy to clipboard of X
   mccopy2cl "${clbs[$n]}"
+  local clb_n="${clbs[$n]: 0: 480}"
 
   # Finalize
   mcpoponsc_quit
@@ -461,6 +461,8 @@ function mcpoponsc_select { # {{{
   mcpopsc
 
   screen -X msgminwait $msgminwait
+
+  screen -X echo "Clipboard: ${clb_n}"
 } # }}}
 
 function mcpopwindow_exit { # {{{
