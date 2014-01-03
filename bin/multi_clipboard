@@ -518,11 +518,13 @@ function mcpopwindow_setheader () { # {{{
   # Set variables
   if [ $is_clb ];then
     header=" $nclbs clipboards in total
-    j(down), k(up), d(delete), s(snippet), Enter(select), q(exit)
+ [n]j(n-down), [n]k(n-up), d(delete), s(snippet)
+ gg(top), G(bottom), [n]gg/G, (go to n), Enter(select), q(quit)
 "
   else
     header=" $nclbs snippets in total
-    j(down), k(up), d(delete), Enter(select), q(exit)
+ [n]j(n-down), [n]k(n-up), d(delete)
+ gg(top), G(bottom), [n]gg/G, (go to n), Enter(select), q(quit)
 "
   fi
 
@@ -565,34 +567,109 @@ function mcpopwindow { # {{{
   local n=0
   local n_offset=0
   local cursor_r=$ext_row
+  local g=0
+  local n_move=0
   tput cup $cursor_r 0
 
   while : ;do
     read -s -n 1 c
     case $c in
       "j" )
-        if [ $n -eq $((nclbs-1)) ];then
-          continue
-        elif [ $cursor_r -eq $((lines-1)) ];then
-          ((n_offset++));((n++))
-          mcpopwindow_printall $n_offset $n
-        else
-          mcpopwindow_printline 0 $((cursor_r)) $n
-          ((cursor_r++));((n++))
-          mcpopwindow_printline 1 $((cursor_r)) $n
+        if [ $n_move -eq 0 ];then
+          n_move=1
         fi
+        for ((i=0; i<n_move; i++));do
+          if [ $n -eq $((nclbs-1)) ];then
+            :
+          elif [ $cursor_r -eq $((lines-1)) ];then
+            ((n_offset++));((n++))
+            mcpopwindow_printall $n_offset $n
+          else
+            mcpopwindow_printline 0 $cursor_r $n
+            ((cursor_r++));((n++))
+            mcpopwindow_printline 1 $cursor_r $n
+          fi
+        done
+        g=0
+        n_move=0
+        continue
         ;;
       "k" )
-        if [ $cursor_r -ne $ext_row ];then
-          mcpopwindow_printline 0 $((cursor_r)) $n
-          ((cursor_r--));((n--))
-          mcpopwindow_printline 1 $((cursor_r)) $n
-        elif [ $n_offset -gt 0 ];then
-          ((n_offset--));((n--))
-          mcpopwindow_printall $n_offset $n
-        else
+        if [ $n_move -eq 0 ];then
+          n_move=1
+        fi
+        for ((i=0; i<n_move; i++));do
+          if [ $cursor_r -ne $ext_row ];then
+            mcpopwindow_printline 0 $((cursor_r)) $n
+            ((cursor_r--));((n--))
+            mcpopwindow_printline 1 $((cursor_r)) $n
+          elif [ $n_offset -gt 0 ];then
+            ((n_offset--));((n--))
+            mcpopwindow_printall $n_offset $n
+          else
+            :
+          fi
+        done
+        g=0
+        n_move=0
+        continue
+        ;;
+      "g" )
+        if [ $g -eq 0 ];then
+          g=1
           continue
         fi
+
+        if [ $n_move -eq 0 ];then
+          n=0
+          n_offset=0
+          cursor_r="$ext_row"
+        elif [ $n_move -gt $nclbs ];then
+          :
+        elif [ $n_move -le $n_offset ];then
+          n=$((n_move-1))
+          n_offset=$n
+          cursor_r=$ext_row
+        elif [ $((n_move)) -gt $((n_offset+max_show)) ];then
+          n=$((n_move-1))
+          n_offset=$((n-max_show+1))
+          cursor_r=$((lines-1))
+        else
+          n=$((n_move-1))
+          cursor_r=$((ext_row+n-n_offset))
+        fi
+        mcpopwindow_printall $n_offset $n
+        n_move=0
+        g=0
+        continue
+        ;;
+      "G" )
+        if [ $n_move -eq 0 ];then
+          n=$((nclbs-1))
+          if [ $n -ge $max_show ];then
+            n_offset=$((nclbs-max_show))
+            cursor_r=$((lines-1))
+          else
+            n_offset=0
+            cursor_r=$((ext_row+n))
+          fi
+        elif [ $n_move -gt $nclbs ];then
+          :
+        elif [ $n_move -le $n_offset ];then
+          n=$((n_move-1))
+          n_offset=$n
+          cursor_r=$ext_row
+        elif [ $n_move -gt $((n_offset+max_show)) ];then
+          n=$((n_move-1))
+          n_offset=$((n-max_show+1))
+          cursor_r=$((lines-1))
+        else
+          n=$((n_move-1))
+          cursor_r=$((ext_row+n-n_offset))
+        fi
+        mcpopwindow_printall $n_offset $n
+        n_move=0
+        continue
         ;;
       "d" )
         mcdelete $n
@@ -625,6 +702,14 @@ function mcpopwindow { # {{{
         ;;
       "q" ) return 0;;
       ""  ) break;;
+      [0-9])
+        if [ $n_move -gt 0 ];then
+          n_move="$n_move""$c"
+        else
+          n_move=$c
+        fi
+        continue
+        ;;
       "*" ) continue;;
     esac
   done
