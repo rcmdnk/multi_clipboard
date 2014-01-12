@@ -581,7 +581,7 @@ function mcpopwindow { # {{{
   while : ;do
     read -s -n 1 c
     case $c in
-      "j"|$'\004'|$'\006' ) # j/^D/^F
+      j|$'\004'|$'\006' ) # j/^D/^F
         if [ $c = $'\004' ];then
           n_move=$((max_show/2))
         elif [ $c = $'\006' ];then
@@ -611,7 +611,7 @@ function mcpopwindow { # {{{
         n_move=0
         continue
         ;;
-      "k"|$'\x15'|$'\002' ) # k/^U/^B
+      k|$'\x15'|$'\002' ) # k/^U/^B
         if [ $c = $'\x15' ];then
           n_move=$((max_show/2))
         elif [ $c = $'\002' ];then
@@ -641,7 +641,7 @@ function mcpopwindow { # {{{
         n_move=0
         continue
         ;;
-      "g" )
+      g )
         if [ $g -eq 0 ];then
           g=1
           continue
@@ -670,7 +670,7 @@ function mcpopwindow { # {{{
         g=0
         continue
         ;;
-      "G" )
+      G )
         if [ $n_move -eq 0 ];then
           n=$((nclbs-1))
           if [ $n -ge $max_show ];then
@@ -698,7 +698,7 @@ function mcpopwindow { # {{{
         n_move=0
         continue
         ;;
-      "d" )
+      d )
         mcdelete $n
         # Check a number of clipboards
         if [ $nclbs -eq 0 ];then
@@ -717,7 +717,7 @@ function mcpopwindow { # {{{
         mcpopwindow_setheader
         mcpopwindow_printall $n_offset $n
         ;;
-      "s" )
+      s )
         if [ $is_clb -eq 0 ];then
           continue
         fi
@@ -727,7 +727,7 @@ function mcpopwindow { # {{{
         f_use=$clb
         mcgetcls
         ;;
-      "q"|$'\01b' ) return 0;;
+      q|$'\01b' ) return 0;;
       ""  ) break;;
       [0-9])
         if [ $n_move -gt 0 ];then
@@ -737,7 +737,7 @@ function mcpopwindow { # {{{
         fi
         continue
         ;;
-      "*" ) continue;;
+      * ) continue;;
     esac
   done
 
