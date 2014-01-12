@@ -385,6 +385,7 @@ function mcpoponsc { # {{{
   fi
 
   screen -X setenv nclbs $nclbs
+  local i
   for ((i=0; i<$nclbs; i++));do
     # screen's command must be less than 512 in total, including setenv ....
     # Therefore stored value should be much shorter 512.
@@ -433,6 +434,7 @@ function mcpoponsc_prev { # {{{
 function mcpoponsc_quit { # {{{
   screen -X msgminwait 0
   local nclbs=$(screen -Q echo '$nclbs')
+  local i
   for ((i=0; i<$nclbs; i++));do
     screen -X unsetenv clb_$i
   done
@@ -505,6 +507,7 @@ function mcpopwindow_printall () { # {{{
   # Header
   echo "$header"
 
+  local i
   for ((i=0; i<$((max_show)); i++));do
     if [ $((i+offset)) -eq $select ];then
       mcpopwindow_printline 1 $((i+ext_row)) $((i+offset))
@@ -578,6 +581,7 @@ function mcpopwindow { # {{{
         if [ $n_move -eq 0 ];then
           n_move=1
         fi
+        local i
         for ((i=0; i<n_move; i++));do
           if [ $n -eq $((nclbs-1)) ];then
             :
@@ -598,6 +602,7 @@ function mcpopwindow { # {{{
         if [ $n_move -eq 0 ];then
           n_move=1
         fi
+        local i
         for ((i=0; i<n_move; i++));do
           if [ $cursor_r -ne $ext_row ];then
             mcpopwindow_printline 0 $((cursor_r)) $n
