@@ -577,44 +577,62 @@ function mcpopwindow { # {{{
   while : ;do
     read -s -n 1 c
     case $c in
-      "j" )
-        if [ $n_move -eq 0 ];then
+      "j"|$'\004'|$'\006' ) # j/^D/^F
+        if [ $c = $'\004' ];then
+          n_move=$((max_show/2))
+        elif [ $c = $'\006' ];then
+          n_move=$((max_show))
+        elif [ $n_move -eq 0 ];then
           n_move=1
         fi
+        local all=0
+        mcpopwindow_printline 0 $cursor_r $n
         local i
         for ((i=0; i<n_move; i++));do
           if [ $n -eq $((nclbs-1)) ];then
             :
           elif [ $cursor_r -eq $((lines-1)) ];then
             ((n_offset++));((n++))
-            mcpopwindow_printall $n_offset $n
+            all=1
           else
-            mcpopwindow_printline 0 $cursor_r $n
             ((cursor_r++));((n++))
-            mcpopwindow_printline 1 $cursor_r $n
           fi
         done
+        if [ $all -eq 1 ];then
+          mcpopwindow_printall $n_offset $n
+        else
+          mcpopwindow_printline 1 $cursor_r $n
+        fi
         g=0
         n_move=0
         continue
         ;;
-      "k" )
-        if [ $n_move -eq 0 ];then
+      "k"|$'\x15'|$'\002' ) # j/^U/^B
+        if [ $c = $'\x15' ];then
+          n_move=$((max_show/2))
+        elif [ $c = $'\002' ];then
+          n_move=$((max_show))
+        elif [ $n_move -eq 0 ];then
           n_move=1
         fi
+        local all=0
+        mcpopwindow_printline 0 $cursor_r $n
         local i
         for ((i=0; i<n_move; i++));do
           if [ $cursor_r -ne $ext_row ];then
-            mcpopwindow_printline 0 $((cursor_r)) $n
             ((cursor_r--));((n--))
-            mcpopwindow_printline 1 $((cursor_r)) $n
           elif [ $n_offset -gt 0 ];then
             ((n_offset--));((n--))
-            mcpopwindow_printall $n_offset $n
+            all=1
           else
             :
           fi
         done
+        if [ $all -eq 1 ];then
+          mcpopwindow_printall $n_offset $n
+        else
+          mcpopwindow_printline 1 $cursor_r $n
+        fi
         g=0
         n_move=0
         continue
