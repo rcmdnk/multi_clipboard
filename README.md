@@ -126,7 +126,7 @@ Add following lines to `.bashrc`.
     export SCREEN_MSGMINWAIT=1
     export CLIPBOARD=$HOME/.clipboard
     export CLMAXHIST=20
-    export CLSEP="" # "" was inserted with "C-v C-g", use bell as a separator
+    export CLSEP=$'\x07' # $'\x07' is BEL
     export CLX="" #xsel/xclip
     if [[ "$OSTYPE" =~ "linux" ]];then
       if which -s xsel;then
