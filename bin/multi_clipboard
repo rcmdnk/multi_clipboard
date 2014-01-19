@@ -238,7 +238,7 @@ msgminwait="${SCREEN_MSGMINWAIT:-1}"
 function mccopy2cl { # {{{
   # Copy to clipboard of X
   if [ "$clx" != "" ];then
-    echo -en "$*" | $clx
+    echo -en "$@" | $clx
   fi
 } # }}}
 
@@ -281,7 +281,7 @@ function mcdelete { # {{{
 
 function mcpush { # {{{
   # Set input
-  local input="$*"
+  local input="$@"
 
   # Ignore blank
   if [ "$input" = "" ];then
@@ -770,7 +770,7 @@ if [ "$1" = "-h" ];then
 elif [ "$1" = "-s" ];then
   # pushpopsc
   shift
-  mcpush "$*"
+  mcpush "$@"
   mcpopsc
 elif [ "$1" = "-S" ];then
   # poponsc
@@ -794,7 +794,7 @@ elif [ "$1" = "-x" ];then
 elif [ "$1" = "-i" ];then
   # push
   shift
-  mcpush "$*"
+  mcpush "$@"
 elif [ "$1" = "-I" ];then
   # pushsc
   shift
