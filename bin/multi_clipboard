@@ -5,7 +5,7 @@
 # *** Utility to keep multiple clipboards ***
 # *** and manage screen's clipboard.      ***
 #
-# More information: https://raw.github.com/rcmdnk/multi_clipboard
+# More information: https://github.com/rcmdnk/multi_clipboard
 ################################################################################
 
 #The MIT License (MIT) {{{
@@ -30,7 +30,8 @@
 #CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #}}}
 
-usage="
+# Help {{{
+_s_help="
 Usage:
 
   $ multi_clipboard -i [args]
@@ -54,9 +55,10 @@ Usage:
 
   $ multi_clipboard -w # or w/o any other options
   # Launch selection window
+  # and return the selected value
 
   $ multi_clipboard -W
-  # Same as -w, in addition, send it to the screen's clipboard
+  # Similar as -w, but value to the screen's clipboard
 
   $ multi_clipboard -x
   # Send the last clipboard to the clipboard of OS (X server)
@@ -71,6 +73,7 @@ Usage:
   $ multi_clipboard -h
   # Show this usage
 "
+# }}}
 
 # Settings for screen {{{
 #
@@ -174,7 +177,16 @@ Usage:
 #          unless you set msgminwait in .screenrc.
 # }}}
 
-# Set valuse {{{
+# Source sentaku {{{
+if ! type sentaku >& /dev/null ;then
+  echo "sd_cl needs sentaku"
+  echo "Please install: https://github.com/rcmdnk/sentaku"
+  exit 1
+fi
+source sentaku -n
+# }}}
+
+# Set variables {{{
 # Following variables can be set in .bashrc or else
 #
 # CLIPBOARD, SCREENEXCHANGE, CLMAXHIST, CLX, CLXOS, CLSEP
@@ -186,17 +198,17 @@ clb=${CLIPBOARD:-$HOME/.clipboard}
 # File for snippet
 snp=${MCSNIPPET:-$HOME/.mcsnippet}
 
-# Flag clb or snp?
-is_clb=1
-
-# File for use
-f_use=$clb
-
 # File for screen's clipboard
 scex=${SCREENEXCHANGE:-/tmp/screen-exchange}
 
+# File for use
+_SENTAKU_INPUT_FILE="$clb"
+
 # Max number of clipboards to keep
-max=${CLMAXHIST:-20}
+_SENTAKU_MAX=${CLMAXHIST:-20}
+
+# Separator of clipboards in the file (default is BEL (, $'\x07')
+_SENTAKU_SEPARATOR="${CLSEP:-$'\x07'}"
 
 # Application to sent the clipboard to the OS's clipboard
 # If blank, don't copy the clipboard to the OS's clipboard
@@ -227,9 +239,6 @@ elif [[ "$OSTYPE" =~ "darwin" ]];then
   fi
 fi
 
-# Separator of clipboards in the file
-cls="${CLSEP:-$'\x07'}"
-
 # Default msgminwait
 msgminwait="${SCREEN_MSGMINWAIT:-1}"
 
@@ -242,98 +251,28 @@ function mccopy2cl { # {{{
   fi
 } # }}}
 
-function mcgetcls { # {{{
-  # Get old words
-  local orig_ifs=$IFS
-  IFS="$cls"
-  touch $f_use
-  clbs=(`cat $f_use`)
-  IFS=$orig_ifs
-  nclbs=${#clbs[@]}
-} # }}}
-
-function mcaligncls { # {{{
-  local n=${1:-0}
-  # Don't align for snippet
-  if [ $is_clb -eq 0 ];then
-    n=0
-  fi
-  local c="${clbs[$n]}"
-  echo -en "$c$cls" > $f_use
-  local=i
-  for((i=0; i<nclbs; i++));do
-    if [ ! $i -eq $n ];then
-      echo -en "${clbs[$i]}$cls" >> $f_use
-    fi
-  done
-} # }}}
-
-function mcdelete { # {{{
-  local n=${1:-$((${#clbs[@]}-1))}
-  unset clbs[$n]
-  rm -f $f_use
-  local c
-  for c in "${clbs[@]}";do
-    echo -en "$c$cls" >> $f_use
-  done
-  mcgetcls
-} # }}}
-
-function mcpush { # {{{
-  # Set input
-  local input="$@"
-
-  # Ignore blank
-  if [ "$input" = "" ];then
-    return
-  fi
-
-  # Renew words
-  mcgetcls
-  local i=0
-  local j=1
-  echo -en "$input$cls" > $f_use
-  while [ $i -lt $nclbs ] && [ $j -lt $max ] ;do
-    local iuse=$i
-    ((i++))
-
-    # Remove duplications
-    if [ "$input" = "${clbs[$iuse]}" ];then
-      continue
-    fi
-    echo -en "${clbs[$iuse]}$cls" >> $f_use
-    ((j++))
-  done
-
-  # Copy to clipboard of X
-  mccopy2cl "$input"
-} # }}}
-
-function mcpushsc { # {{{
-  screen -X writebuf
-  mcpush "$(cat $scex)"
-} # }}}
-
 function mcpop { # {{{
   ## Show stored words
-  mcgetcls
-  if [ $nclbs -eq 0 ];then
-    printf "No clipboards in $f_use\n\n"
-    return
+
+  # Get values
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    return $ret
   fi
-  echo
-  for((i=$((nclbs-1)); i>=0; i--));do
-    if [ $(echo "${clbs[$i]}"|wc -l) -ge 3 ];then
-      local clbshow="$(echo "${clbs[$i]}"|head -n2)
+
+  echo >/dev/tty
+  for((i=$((_s_n-1)); i>=0; i--));do
+    local clbshow="${_s_inputs[$i]}"
+    if [ $(echo "${clbshow}"|wc -l) -ge 3 ];then
+      clbshow="$(echo "${clbshow}"|head -n2)
 ..."
-    else
-      local clbshow="${clbs[$i]}"
     fi
     # %%/\\ is reduced to %/\ during the conversions
     # \e\" makes problem (stop the output), then \ must be conveted to the output
     # `\\` is converted to one \ for the real clipboard, too, to be fixed.
-    local clbshow=$(echo "$clbshow" |perl -pe 's/\n/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'|perl -pe 's/\\/\\\\/g')
-    printf "%2d: $clbshow\n" $((i+1))
+    clbshow=$(echo "$clbshow" |perl -pe 's/\n/\n    /g' |perl -pe 's/    $//g' |perl -pe 's/%/%%/g'|perl -pe 's/\\/\\\\/g')
+    printf "%2d: $clbshow\n" $i
   done
 
   # Choose buffer
@@ -342,27 +281,37 @@ function mcpop { # {{{
   if [ "$n" = "q" ];then
     return 0
   fi
-  if ! echo $n|grep -q "^[1-9][0-9]*$" || [ "$n" -gt "$nclbs" ];then
-    echo "$f is not valid"
-    echo "Enter [1-$((nclbs))] or q (to quit)"
+  if ! expr "$n" : '[0-9]*' >/dev/null || [ "$n" -ge "$_s_n" ];then
+    echo "$n is not valid"
+    echo "Enter [0-$((_s_n-1))] or q (to quit)"
     return 1
   fi
-  # Subtract one to adjust for the array
-  ((n--))
-
-  # Align clipboards
-  mcaligncls $n
 
   # Copy to clipboard of X
-  mccopy2cl "${clbs[$n]}"
+  mccopy2cl "${_s_inputs[$n]}"
+
+  # echo
+  echo "${_s_inputs[$n]}"
+
+  # Align clipboards
+  if [ "$_s_file" = "$clb" ];then
+    _sf_align_values $n 0
+  fi
 } # }}}
 
 function mcpopsc { # {{{
   screen -X msgminwait 0
-  mcgetcls
-  echo -en "${clbs[0]}" > $scex
+
+  # Get values
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    return $ret
+  fi
+
+  echo -en "${_s_inputs[0]}" > $scex
   screen -X readbuf
-  printf "\e^Clipbaord: ${clbs[0]: 0:480}\e\\"
+  printf "\e^Clipbaord: ${_s_inputs[0]: 0:480}\e\\"
   screen -X msgminwait $msgminwait
 } # }}}
 
@@ -371,35 +320,34 @@ function mcpoponsc_messaage { # {{{
   # If more than 512 characters were given to the message line,
   # the message can't be correctly shown (and overflows will appear in the window)
   #printf "\e^n/p(next/prev) q(quit) Space(select) %2d: $clbshow\e\\" $mcpoponsc_n
-  screen -X echo '$mcpoponsc_n/$nclbs: $clb_'$((mcpoponsc_n-1))
+  screen -X echo '$mcpoponsc_n/$nclbs: $clb_'$((mcpoponsc_n))
 } # }}}
 
 function mcpoponsc { # {{{
   screen -X msgminwait 0
-  # Get stored words
-  mcgetcls
 
-  # Check a number of clipboards
-  if [ $nclbs -eq 0 ];then
-    printf "\eNo clipboards in $f_use\e\\"
-    sleep 1
-    return
+  # Get values
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    _sf_finalize
+    return $ret
   fi
 
-  screen -X setenv nclbs $nclbs
+  screen -X setenv nclbs $_s_n
   local i
-  for ((i=0; i<$nclbs; i++));do
+  for ((i=0; i<$_s_n; i++));do
     # screen's command must be less than 512 in total, including setenv ....
     # Therefore stored value should be much shorter 512.
-    local clbshow="${clbs[$i]: 0: 480}"
+    local clbshow="${_s_inputs[$i]: 0: 480}"
     screen -X setenv "clb_${i}" "$clbshow"
   done
 
   # mcpoponsc_n starts from 1
-  # It is better to use same number for pringing in mcpoponsc_messaage,
+  # It is better to use same number for printing in mcpoponsc_messaage,
   # because setenv command also show a message in a short time.
   # If they are different, there will be ugly flash.
-  mcpoponsc_n=1
+  mcpoponsc_n=0
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
   screen -X msgminwait $msgminwait
@@ -409,7 +357,7 @@ function mcpoponsc_next { # {{{
   screen -X msgminwait 0
   local mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
   local nclbs=$(screen -Q echo '$nclbs')
-  if [ $mcpoponsc_n -eq 1 ];then
+  if [ $mcpoponsc_n -eq 0 ];then
     mcpoponsc_n=$((nclbs))
   else
     ((mcpoponsc_n--))
@@ -423,8 +371,8 @@ function mcpoponsc_prev { # {{{
   screen -X msgminwait 0
   local mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
   local nclbs=$(screen -Q echo '$nclbs')
-  if [ $mcpoponsc_n -eq $((nclbs)) ];then
-    mcpoponsc_n=1
+  if [ $mcpoponsc_n -eq $((nclbs-1)) ];then
+    mcpoponsc_n=0
   else
     ((mcpoponsc_n++))
   fi
@@ -447,16 +395,25 @@ function mcpoponsc_quit { # {{{
 
 function mcpoponsc_select { # {{{
   screen -X msgminwait 0
-  mcgetcls
+
+  # Get values
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    _sf_finalize
+    return $ret
+  fi
 
   mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  local n=$((mcpoponsc_n-1))
-  # Align clipboards
-  mcaligncls $n
 
   # Copy to clipboard of X
-  mccopy2cl "${clbs[$n]}"
-  local clb_n="${clbs[$n]: 0: 480}"
+  mccopy2cl "${_s_inputs[$mcpoponsc_n]}"
+  local clb_n="${_s_inputs[$mcpoponsc_n]: 0: 480}"
+
+  # Align clipboards
+  if [ "$_s_file" = "$clb" ];then
+    _sf_align_values $mcpoponsc_n 0
+  fi
 
   # Finalize
   mcpoponsc_quit
@@ -469,284 +426,36 @@ function mcpoponsc_select { # {{{
   screen -X echo "Clipboard: ${clb_n}"
 } # }}}
 
-function mcpopwindow_exit { # {{{
-  # clear after selection
-  clear
-
-  # Show cursor
-  tput cnorm 2>/dev/null || tput vs 2>/dev/null
-
-  # Restore display
-  tput rmcup 2>/dev/null || tput te 2>/dev/null
-
-  # Enable echo input
-  stty echo
-} # }}}
-
-function mcpopwindow_printline () { # is_select row n_clb {{{
-  local clbshow="$(echo ${clbs[$3]}|tr '\n' ' '|sed 's/%/%%/g'|sed 's/\\/\\\\/g')"
-  tput cup $2 0
-  if [ $1 -eq 1 ];then
-    printf "\e[7m%3d: ${clbshow: 0: $((cols-5))}\e[m" $(($3+1))
-  else
-    printf "%3d: ${clbshow: 0: $((cols-5))}" $(($3+1))
-  fi
-  tput cup $2 0
-} # }}}
-
-function mcpopwindow_printall () { # {{{
-  local offset=0
-  local select=0
-  if [ $# -gt 0 ];then
-    offset=$1
-    if [ $# -gt 1 ];then
-      select=$2
-    fi
-  fi
-
-  clear
-
-  # Header
-  echo "$header"
-
-  local i
-  for ((i=0; i<$((max_show)); i++));do
-    if [ $((i+offset)) -eq $select ];then
-      mcpopwindow_printline 1 $((i+ext_row)) $((i+offset))
-    else
-      mcpopwindow_printline 0 $((i+ext_row)) $((i+offset))
-    fi
-  done
-} # }}}
-
-function mcpopwindow_setheader () { # {{{
-  # Set variables
-  if [ $is_clb ];then
-    header=" $nclbs clipboards in total
- [n]j(n-down), [n]k(n-up), gg(top), G(bottom), [n]gg/G, (go to n),
- ^D(Half page down), ^U(Half page up), ^F(Page down), ^B(Page Up),
- d(delete), s(snippet), Enter(select), q(quit)
+_sf_set_header () { # {{{
+  if [ $_s_noheader -eq 1 -o $_s_lines -lt 10 -o $_s_cols -lt 60 ];then
+    return
+  elif [ "$_s_file" = "$clb" ];then
+    _s_header=" $_s_n clipboards in total
+ vimike updown, e.g)j:up, k:down, gg/G
+ d(delete), s(snippet), /(search), Enter(select), q(quit)
 "
   else
-    header=" $nclbs snippets in total
- [n]j(n-down), [n]k(n-up), gg(top), G(bottom), [n]gg/G, (go to n),
- ^D(Half page down), ^U(Half page up), ^F(Page down), ^B(Page Up),
- d(delete), Enter(select), q(quit)
+    _s_header=" $_s_n snippets in total
+ vimike updown, e.g)j:up, k:down, gg/G
+ d(delete), /(search), Enter(select), q(quit)
 "
-  fi
-
-  ext_row=$(echo "$header"|wc -l)
-  lines=$(tput lines)
-  cols=$(tput cols)
-  max_show=$nclbs
-  if [ $nclbs -gt $((lines-ext_row)) ];then
-    max_show=$((lines-ext_row))
   fi
 } # }}}
 
-function mcpopwindow { # {{{
-  mcgetcls
-
-  # Check a number of clipboards
-  if [ $nclbs -eq 0 ];then
-    printf "No clipboards in $f_use\n\n"
-    sleep 1
+_sf_s () { ### {{{
+  _s_is_print=0
+  if [ "$_s_file" != "$clb" ];then
     return
   fi
-
-  # Set trap
-  trap mcpopwindow_exit 0
-
-  # Hide cursor
-  tput civis 2>/dev/null || tput vi 2>/dev/null
-
-  # Save current display
-  tput smcup 2>/dev/null || tput ti 2>/dev/null
-
-  # Hide any input (need to cleanup a print, especially when re-draw with printall.)
-  stty -echo
-
-  # First view
-  mcpopwindow_setheader
-  mcpopwindow_printall
-
-  # Select clipboard
-  local n=0
-  local n_offset=0
-  local cursor_r=$ext_row
-  local g=0
-  local n_move=0
-  tput cup $cursor_r 0
-
-  while : ;do
-    read -s -n 1 c
-    case $c in
-      j|$'\004'|$'\006' ) # j/^D/^F
-        if [ $c = $'\004' ];then
-          n_move=$((max_show/2))
-        elif [ $c = $'\006' ];then
-          n_move=$((max_show))
-        elif [ $n_move -eq 0 ];then
-          n_move=1
-        fi
-        local all=0
-        mcpopwindow_printline 0 $cursor_r $n
-        local i
-        for ((i=0; i<n_move; i++));do
-          if [ $n -eq $((nclbs-1)) ];then
-            :
-          elif [ $cursor_r -eq $((lines-1)) ];then
-            ((n_offset++));((n++))
-            all=1
-          else
-            ((cursor_r++));((n++))
-          fi
-        done
-        if [ $all -eq 1 ];then
-          mcpopwindow_printall $n_offset $n
-        else
-          mcpopwindow_printline 1 $cursor_r $n
-        fi
-        g=0
-        n_move=0
-        continue
-        ;;
-      k|$'\x15'|$'\002' ) # k/^U/^B
-        if [ $c = $'\x15' ];then
-          n_move=$((max_show/2))
-        elif [ $c = $'\002' ];then
-          n_move=$((max_show))
-        elif [ $n_move -eq 0 ];then
-          n_move=1
-        fi
-        local all=0
-        mcpopwindow_printline 0 $cursor_r $n
-        local i
-        for ((i=0; i<n_move; i++));do
-          if [ $cursor_r -ne $ext_row ];then
-            ((cursor_r--));((n--))
-          elif [ $n_offset -gt 0 ];then
-            ((n_offset--));((n--))
-            all=1
-          else
-            :
-          fi
-        done
-        if [ $all -eq 1 ];then
-          mcpopwindow_printall $n_offset $n
-        else
-          mcpopwindow_printline 1 $cursor_r $n
-        fi
-        g=0
-        n_move=0
-        continue
-        ;;
-      g )
-        if [ $g -eq 0 ];then
-          g=1
-          continue
-        fi
-
-        if [ $n_move -eq 0 ];then
-          n=0
-          n_offset=0
-          cursor_r="$ext_row"
-        elif [ $n_move -gt $nclbs ];then
-          :
-        elif [ $n_move -le $n_offset ];then
-          n=$((n_move-1))
-          n_offset=$n
-          cursor_r=$ext_row
-        elif [ $((n_move)) -gt $((n_offset+max_show)) ];then
-          n=$((n_move-1))
-          n_offset=$((n-max_show+1))
-          cursor_r=$((lines-1))
-        else
-          n=$((n_move-1))
-          cursor_r=$((ext_row+n-n_offset))
-        fi
-        mcpopwindow_printall $n_offset $n
-        n_move=0
-        g=0
-        continue
-        ;;
-      G )
-        if [ $n_move -eq 0 ];then
-          n=$((nclbs-1))
-          if [ $n -ge $max_show ];then
-            n_offset=$((nclbs-max_show))
-            cursor_r=$((lines-1))
-          else
-            n_offset=0
-            cursor_r=$((ext_row+n))
-          fi
-        elif [ $n_move -gt $nclbs ];then
-          :
-        elif [ $n_move -le $n_offset ];then
-          n=$((n_move-1))
-          n_offset=$n
-          cursor_r=$ext_row
-        elif [ $n_move -gt $((n_offset+max_show)) ];then
-          n=$((n_move-1))
-          n_offset=$((n-max_show+1))
-          cursor_r=$((lines-1))
-        else
-          n=$((n_move-1))
-          cursor_r=$((ext_row+n-n_offset))
-        fi
-        mcpopwindow_printall $n_offset $n
-        n_move=0
-        continue
-        ;;
-      d )
-        mcdelete $n
-        # Check a number of clipboards
-        if [ $nclbs -eq 0 ];then
-          clear
-          printf "No clipboards in $f_use\n\n"
-          sleep 1
-          return 0
-        fi
-        if [ $n -eq $nclbs ];then
-          if [ $n_offset -gt 0 ];then
-            ((n_offset--));((n--))
-          else
-            ((cursor_r--));((n--))
-          fi
-        fi
-        mcpopwindow_setheader
-        mcpopwindow_printall $n_offset $n
-        ;;
-      s )
-        if [ $is_clb -eq 0 ];then
-          continue
-        fi
-        c_use="${clbs[$n]}"
-        f_use=$snp
-        mcpush "$c_use"
-        f_use=$clb
-        mcgetcls
-        ;;
-      q|$'\01b' ) return 0;;
-      ""  ) break;;
-      [0-9])
-        if [ $n_move -gt 0 ];then
-          n_move="$n_move""$c"
-        else
-          n_move=$c
-        fi
-        continue
-        ;;
-      * ) continue;;
-    esac
-  done
-
-  # Align clipboards
-  mcaligncls $n
-
-  # Copy to clipboard of X
-  mccopy2cl "${clbs[$n]}"
-
+  _s_file="$snp"
+  _sf_push "${_s_inputs[$_s_current_n]}"
+  _s_file="$clb"
+  # Get values
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    _sf_quit $ret
+  fi
 } # }}}
 
 function mcpushx { # {{{
@@ -755,73 +464,105 @@ function mcpushx { # {{{
     echo "No clip board application is assigned!"
     return
   fi
-  mcgetcls
-  echo -en "${clbs[0]}" | $clx
+  _sf_get_values
+  local ret=$?
+  if [ $ret -ne 0 ];then
+    return $ret
+  fi
+  echo -en "${_s_inputs[0]}" | $clx
 } # }}}
 
-# Check arguments and execute commands{{{
-if [ "$1" = "snippet" ];then
-  is_clb=0
-  f_use=$snp
-  shift
-fi
-if [ "$1" = "-h" ];then
-  echo "$usage"
-elif [ "$1" = "-s" ];then
-  # pushpopsc
-  shift
-  mcpush "$@"
-  mcpopsc
-elif [ "$1" = "-S" ];then
-  # poponsc
-  shift
-  if [ "$1" = "" ];then
-    mcpoponsc
-  elif [ "$1" = "-n" ];then
-    mcpoponsc_next
-  elif [ "$1" = "-p" ];then
-    mcpoponsc_prev
+_sf_initialize_user () { # {{{
+  _s_delete=1
+  _s_is_sc=0
+} # }}}
+
+_sf_execute () { # {{{
+  _sf_align_values
+
+  if [ $_s_is_sc -eq 1 ];then
+    mcpopsc
+  else
+    echo "${_s_inputs[0]}"
+  fi
+  mccopy2cl "${_s_inputs[0]}"
+  _s_align=0
+} # }}}
+
+_sf_check_args () { # {{{
+
+  _s_continue=0
+  if [ "$1" = "snippet" ];then
+    _s_file=$snp
+    shift
+  fi
+  if [ "$1" = "-h" ];then
+    shift
+    echo "$_s_help" >/dev/tty
   elif [ "$1" = "-s" ];then
-    mcpoponsc_select
-  elif [ "$1" = "-q" ];then
-    mcpoponsc_quit
+    # pushpopsc
+    shift
+    _sf_push "$@"
+    mccopy2cl "$@"
+    mcpopsc
+  elif [ "$1" = "-S" ];then
+    # poponsc
+    shift
+    if [ "$1" = "" ];then
+      mcpoponsc
+    elif [ "$1" = "-n" ];then
+      mcpoponsc_next
+    elif [ "$1" = "-p" ];then
+      mcpoponsc_prev
+    elif [ "$1" = "-s" ];then
+      mcpoponsc_select
+    elif [ "$1" = "-q" ];then
+      mcpoponsc_quit
+    fi
+    shift
+  elif [ "$1" = "-x" ];then
+    # pushpopsc
+    shift
+    mcpushx
+  elif [ "$1" = "-i" ];then
+    # push
+    shift
+    _sf_push "$@"
+    mccopy2cl "$@"
+  elif [ "$1" = "-I" ];then
+    # pushsc
+    shift
+    touch $scex
+    screen -X writebuf
+    _s_noshow=1
+    _sf_push "$(cat $scex)"
+    mccopy2cl "$(cat $scex)"
+  elif [ "$1" = "-c" ];then
+    # cleanup store file
+    echo "echo > $_s_file"
+    echo > $_s_file
+  elif [ "$1" = "-o" ];then
+    # pop
+    shift
+    mcpop
+  elif [ "$1" = "-O" ];then
+    # popsc
+    shift
+    mcpop
+    ret=$?
+    if [ $ret -ne 0 ];then
+      exit $ret
+    fi
+    mcpopsc
+  elif [ "$1" = "-W" ];then
+    # mcpopwindow for screen
+    shift
+    _s_continue=1
+    _s_is_sc=1
+  else # -w or else
+    # mcpopwindow
+    _s_continue=1
   fi
-  shift
-elif [ "$1" = "-x" ];then
-  # pushpopsc
-  shift
-  mcpushx
-elif [ "$1" = "-i" ];then
-  # push
-  shift
-  mcpush "$@"
-elif [ "$1" = "-I" ];then
-  # pushsc
-  shift
-  mcpushsc
-elif [ "$1" = "-c" ];then
-  # cleanup store file
-  echo "echo > $f_use"
-  echo > $f_use
-elif [ "$1" = "-o" ];then
-  # pop
-  shift
-  mcpop
-elif [ "$1" = "-O" ];then
-  # popsc
-  shift
-  mcpop
-  ret=$?
-  if [ $ret -ne 0 ];then
-    exit $ret
-  fi
-  mcpopsc
-elif [ "$1" = "-W" ];then
-  # mcpopwindow for screen
-  shift
-  mcpopwindow
-  mcpopsc
-else # -w or else
-  # mcpopwindow
-  mcpopwindow
-fi # }}}
+} # }}}
+
+_sf_main "$@"
