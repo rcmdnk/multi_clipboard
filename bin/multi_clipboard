@@ -310,7 +310,7 @@ function mcpush { # {{{
 } # }}}
 
 function mcpushsc { # {{{
-  touch $scex
+  screen -X writebuf
   mcpush "$(cat $scex)"
 } # }}}
 
