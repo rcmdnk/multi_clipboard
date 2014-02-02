@@ -5,6 +5,14 @@ Clipboard manager for GNU screen.
 
 # Installation
 
+:white_check_mark: current version requires [sentaku](https://github.com/rcmdnk/sentaku).
+
+Please install sentaku or use
+[standalone version](https://github.com/rcmdnk/multi_clipboard/tree/standalone)
+(standalone version could be obsolete).
+
+If you use Homebrew to insatll, sentaku will be installed automatically, too.
+
 ## curl
 
 You can use an install script on the web like:
@@ -17,6 +25,8 @@ and you may be asked root password.
 If you want to install other directory, do like:
 
     $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh|  prefix=~/usr/local/ sh
+
+:warning: Install [sentaku](https://github.com/rcmdnk/sentaku), too.
 
 ## Homebrew at OS X
 
@@ -45,6 +55,8 @@ and do `brewall install`, you will have all useful scripts in
 
 Or, simply download scripts and set where you like.
 
+:warning: Install [sentaku](https://github.com/rcmdnk/sentaku), too.
+
 
 # Setup
 
@@ -54,13 +66,13 @@ Add following lines to `.screenrc`
 
     # Screen exchange file
     bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
-    
+
 
     # Overwrite keys in copy mode
     bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
     bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
-    
+
 
     # Selection mode
     # C-a a : default is meta (Send the command character (C-a) to window.)
@@ -82,7 +94,7 @@ Add following lines to `.screenrc`
 
     # Choose and Quit
     bind -c mc ' ' eval 'exec multi_clipboard -S -s'
-    
+
 
     # Launch selection window
     # C-a q : default is xon (Send a control-q to the current window.)
@@ -219,9 +231,11 @@ Other command line usages are here:
     $ multi_clipboard -c
     # Clean up clipboard file
 
+    $ multi_clipboard snippet [option]
+    # Use 'snippet' file instead of saved clipboards.
+
     $ multi_clipboard -h
     # Show this usage
-    
 
 # Snippet
 
