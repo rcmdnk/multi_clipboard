@@ -3,43 +3,35 @@ multi_clipboard
 
 Clipboard manager for GNU screen.
 
+:warning: This is standalone version.
+It can be used w/o other script, but this version could be obsolete.
+
+Please use [master version](https://github.com/rcmdnk/multi_clipboard)
+if you wish to the latest version.
+
 # Installation
 
 ## curl
 
 You can use an install script on the web like:
 
-    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh| sh
+    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install_sa/install.sh| sh
 
 This will install scripts to `/usr/bin`
 and you may be asked root password.
 
 If you want to install other directory, do like:
 
-    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh|  prefix=~/usr/local/ sh
+    $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install_sa/install.sh|  prefix=~/usr/local/ sh
 
 ## Homebrew at OS X
 
 On Mac, you can install scripts by [Homebrew](https://github.com/mxcl/homebrew):
 
     $ brew tap rcmdnk/rcmdnkpac
+    $ cd $(brew --prefix)/Library/Taps/rcmdnk--rcmdnkpac
+    $ git checkout d85c945 multi_clipboard.rb # use v0.0.4
     $ brew install multi_clipboard
-
-If you have [brewall](https://github.com/rcmdnk/homebrew-brewall), add following lines to Brewfile:
-
-    tap 'rcmdnk/rcmdnkpac'
-    brew 'multi_clipboard'
-
-then, do:
-
-    $ brewall install
-
-Or if you write like:
-
-    tapall 'rcmdnk/rcmdnkpac'
-
-and do `brewall install`, you will have all useful scripts in
-[rcmdnkpac](https://github.com/rcmdnk/homebrew-rcmdnkpac).
 
 ## Download
 
