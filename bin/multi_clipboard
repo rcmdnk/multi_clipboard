@@ -431,11 +431,11 @@ _sf_set_header () { # {{{
     return
   elif [ "$_s_file" = "$clb" ];then
     _s_header=" $_s_n clipboards in total
- vimike updown, e.g)j:up, k:down, gg/G
+ vimike updown, e.g)j:down, k:up, gg/G
  d(delete), s(snippet), /(search), Enter(select), q(quit)"
   else
     _s_header=" $_s_n snippets in total
- vimike updown, e.g)j:up, k:down, gg/G
+ vimike updown, e.g)j:down, k:up, gg/G
  d(delete), /(search), Enter(select), q(quit)"
   fi
 } # }}}
