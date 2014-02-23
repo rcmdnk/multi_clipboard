@@ -7,13 +7,13 @@ Clipboard manager for GNU screen.
 
 :white_check_mark: current version requires [sentaku](https://github.com/rcmdnk/sentaku).
 
-If you use Homebrew or Curl to insatll, sentaku will be installed automatically, too.
+If you use Homebrew or cURL to insatll, sentaku will be installed automatically, too.
 
 Please install sentaku or use
 [standalone version](https://github.com/rcmdnk/multi_clipboard/tree/standalone)
 (standalone version could be obsolete).
 
-## curl
+## cURL
 
 You can use an install script on the web like:
 
