@@ -343,10 +343,11 @@ function mcpoponsc { # {{{
     screen -X setenv "clb_${i}" "$clbshow"
   done
 
-  # mcpoponsc_n starts from 1
+  # mcpoponsc_n starts from 0
   # It is better to use same number for printing in mcpoponsc_messaage,
   # because setenv command also show a message in a short time.
   # If they are different, there will be ugly flash.
+  # Then, in message, mcpoponsc_n+1 is used.
   mcpoponsc_n=0
   screen -X setenv mcpoponsc_n $mcpoponsc_n
   mcpoponsc_messaage
@@ -358,7 +359,7 @@ function mcpoponsc_next { # {{{
   local mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
   local nclbs=$(screen -Q echo '$nclbs')
   if [ $mcpoponsc_n -eq 0 ];then
-    mcpoponsc_n=$((nclbs))
+    mcpoponsc_n=$((nclbs-1))
   else
     ((mcpoponsc_n--))
   fi
