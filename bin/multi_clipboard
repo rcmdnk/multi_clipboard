@@ -34,147 +34,143 @@
 _s_help="
 Usage:
 
-  $ multi_clipboard -i [args]
-  # Push [args]to the clipboard list
+    $ multi_clipboard -i [args]
+    # Push [args]to the clipboard list
+    
+    $ multi_clipboard -I
+    # Push the screen's clipboard to the clipboard list
+    
+    $ multi_clipboard -o
+    # Will show the clipboard list, then select one, which will be placed
+    # the top of the clipboard list.
+    
+    $ multi_clipboard -O
+    # Same as -o, in addition, send it to the screen's clipboard
+    
+    $ multi_clipboard -s [args]
+    # Send [args] to the screen's clipboard
+    
+    $ multi_clipboard -S
+    # Use in screen for selection mode.
+    
+    $ multi_clipboard -w # or w/o any other options
+    # Launch selection window
+    # and return the selected value
+    
+    $ multi_clipboard -W
+    # Similar as -w, but value to the screen's clipboard
+    
+    $ multi_clipboard -x
+    # Send the last clipboard to the clipboard of OS (X server)
+    # Even if CLX is not set, it uses CLXOS, is available
+    
+    $ multi_clipboard -c
+    # Clean up clipboard file
+    
+    $ multi_clipboard snippet [option]
+    # Use 'snippet' file instead of saved clipboards.
+    
+    $ multi_clipboard -h
+    # Show this usage
 
-  $ multi_clipboard -I
-  # Push the screen's clipboard to the clipboard list
+To use in screen, put this script where
+PATH is set , and write in .screenrc:
 
-  $ multi_clipboard -o
-  # Will show the clipboard list, then select one, which will be placed
-  # the top of the clipboard list.
 
-  $ multi_clipboard -O
-  # Same as -o, in addition, send it to the screen's clipboard
+----------.screenrc---------
+# Screen exchange file
+bufferfile "\$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
 
-  $ multi_clipboard -s [args]
-  # Send [args] to the screen's clipboard
 
-  $ multi_clipboard -S
-  # Use in screen for selection mode.
+# Overwrite keys in copy mode
+bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
+bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
+bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
 
-  $ multi_clipboard -w # or w/o any other options
-  # Launch selection window
-  # and return the selected value
 
-  $ multi_clipboard -W
-  # Similar as -w, but value to the screen's clipboard
+# Selection mode
+# C-a a : default is meta (Send the command character (C-a) to window.)
+# C-a C-a : default is other (Toggle the window displayed previously.)
+bind a eval 'command -c mc' 'exec multi_clipboard -S'
+bind ^a eval 'command -c mc' 'exec multi_clipboard -S'
 
-  $ multi_clipboard -x
-  # Send the last clipboard to the clipboard of OS (X server)
-  # Even if CLX is not set, it uses CLXOS, is available
+# Next
+bind -c mc n eval 'command -c mc' 'exec multi_clipboard -S -n'
+bind -c mc ^n eval 'command -c mc' 'exec multi_clipboard -S -n'
 
-  $ multi_clipboard -c
-  # Clean up clipboard file
+# Previous
+bind -c mc p eval 'command -c mc' 'exec multi_clipboard -S -p'
+bind -c mc ^p eval 'command -c mc' 'exec multi_clipboard -S -p'
 
-  $ multi_clipboard snippet [option]
-  # Use 'snippet' file instead of saved clipboards.
+# Quit
+bind -c mc q eval 'exec multi_clipboard -S -q'
+bind -c mc ^q eval 'exec multi_clipboard -S -q'
 
-  $ multi_clipboard -h
-  # Show this usage
+# Choose and Quit
+bind -c mc ' ' eval 'exec multi_clipboard -S -s'
+
+
+# Launch selection window
+# C-a q : default is xon (Send a control-q to the current window.)
+bind q screen -t multi_clipboard -p - multi_clipboard -W
+----------.screenrc---------
+
+These settings enable that a clipboard copied by SPACE, Y and  W
+in the copy mode will be sent to the clipboard list.
+If CLX is set, it is also sent to the OS's (X server's) clipboard.
+
+C-a a (C-a) can be used to select a clipboard from the list,
+instead of using multi_clipboard -O.
+Once you input C-a a, current clipboard is shown in the message line like:
+
+    0: current_clipboard
+
+You can choose next and previous candidate by n and p, respectively.
+Use space to select a shown clipbaord.
+Use q to quit.
+
+C-a q will launch new window for selecting the clipboard.
+
+And set environmental variables in .bashrc
+----------.bashrc---------
+export SCREENEXCHANGE=\$HOME/.screen-exchange
+export SCREEN_MSGMINWAIT=1
+export CLIPBOARD=\$HOME/.clipboard
+export CLMAXHIST=20
+export CLSEP=\$'\x07' # \$'\x07' is BEL
+export CLX="" #xsel/xclip
+if [[ "\$OSTYPE" =~ "linux" ]];then
+  if which -s xsel;then
+    export CLXOS="xsel"
+  elif which -s xsel;then
+    export CLXOS="xclip"
+  fi
+elif [[ "\$OSTYPE" =~ "cygwin" ]];then
+  if which -s putclip;then
+    export CLXOS="putclip"
+  elif which -s xsel;then
+    export CLXOS="xsel"
+  elif which -s xsel;then
+    export CLXOS="xclip"
+  fi
+elif [[ "\$OSTYPE" =~ "darwin" ]];then
+  if which -s pbcopy;then
+    export CLXOS="pbcopy"
+  fi
+fi
+----------.bashrc---------
+
+
+Note 1): SCREENEXCHANGE must be set in .bashrc
+         or you must remove the bufferfile definition line from .screenrc
+         In the later case, /tmp/screen-exchange will be used.
+
+Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
+         because multi_clipboard temporally change it to 0.
+         Default value in both screen and multi_clipboard is 1.
+         Therefore, you don't need to set SCREEN_MSGMINWAIT
+         unless you set msgminwait in .screenrc.
 "
-# }}}
-
-# Settings for screen {{{
-#
-# To use in screen, put this script where
-# PATH is set , and write in .screenrc:
-#
-
-# ----------.screenrc---------
-## Screen exchange file
-#bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
-#
-#
-## Overwrite keys in copy mode
-#bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
-#bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
-#bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
-#
-#
-## Selection mode
-## C-a a : default is meta (Send the command character (C-a) to window.)
-## C-a C-a : default is other (Toggle the window displayed previously.)
-#bind a eval 'command -c mc' 'exec multi_clipboard -S'
-#bind ^a eval 'command -c mc' 'exec multi_clipboard -S'
-#
-## Next
-#bind -c mc n eval 'command -c mc' 'exec multi_clipboard -S -n'
-#bind -c mc ^n eval 'command -c mc' 'exec multi_clipboard -S -n'
-#
-## Previous
-#bind -c mc p eval 'command -c mc' 'exec multi_clipboard -S -p'
-#bind -c mc ^p eval 'command -c mc' 'exec multi_clipboard -S -p'
-#
-## Quit
-#bind -c mc q eval 'exec multi_clipboard -S -q'
-#bind -c mc ^q eval 'exec multi_clipboard -S -q'
-#
-## Choose and Quit
-#bind -c mc ' ' eval 'exec multi_clipboard -S -s'
-#
-#
-## Launch selection window
-## C-a q : default is xon (Send a control-q to the current window.)
-#bind q screen -t multi_clipboard -p - multi_clipboard -W
-# ----------.screenrc---------
-
-#
-# These settings enable that a clipboard copied by SPACE, Y and  W
-# in the copy mode will be sent to the clipboard list.
-# If CLX is set, it is also sent to the OS's (X server's) clipboard.
-#
-# C-a a (C-a) can be used to select a clipboard from the list,
-# instead of using multi_clipboard -O.
-# Once you input C-a a, current clipboard is shown in the message line like:
-#
-#     0: current_clipboard
-#
-# You can choose next and previous candidate by n and p, respectively.
-# Use space to select a shown clipbaord.
-# Use q to quit.
-#
-# C-a q will launch new window for selecting the clipboard.
-#
-# And set environmental variables in .bashrc
-# ----------.bashrc---------
-# export SCREENEXCHANGE=$HOME/.screen-exchange
-# export SCREEN_MSGMINWAIT=1
-# export CLIPBOARD=$HOME/.clipboard
-# export CLMAXHIST=20
-# export CLSEP=$'\x07' # $'\x07' is BEL
-# export CLX="" #xsel/xclip
-# if [[ "$OSTYPE" =~ "linux" ]];then
-#   if which -s xsel;then
-#     export CLXOS="xsel"
-#   elif which -s xsel;then
-#     export CLXOS="xclip"
-#   fi
-# elif [[ "$OSTYPE" =~ "cygwin" ]];then
-#   if which -s putclip;then
-#     export CLXOS="putclip"
-#   elif which -s xsel;then
-#     export CLXOS="xsel"
-#   elif which -s xsel;then
-#     export CLXOS="xclip"
-#   fi
-# elif [[ "$OSTYPE" =~ "darwin" ]];then
-#   if which -s pbcopy;then
-#     export CLXOS="pbcopy"
-#   fi
-# fi
-# ----------.bashrc---------
-#
-#
-# Note 1): SCREENEXCHANGE must be set in .bashrc
-#          or you must remove the bufferfile definition line from .screenrc
-#          In the later case, /tmp/screen-exchange will be used.
-#
-# Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
-#          because multi_clipboard temporally change it to 0.
-#          Default value in both screen and multi_clipboard is 1.
-#          Therefore, you don't need to set SCREEN_MSGMINWAIT
-#          unless you set msgminwait in .screenrc.
 # }}}
 
 # Source sentaku {{{
