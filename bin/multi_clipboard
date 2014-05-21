@@ -215,6 +215,29 @@ _SENTAKU_SEPARATOR="${CLSEP:-$'\x07'}"
 # other than when "-x" is given
 clx=${CLX:-""}
 
+# Temporary files for mcpop
+tmp_dir=$TMPDIR
+if [ ! "$tmp_DIR" ];then
+  if [ "$TMP" ];then
+    export tmp_dir=$TMP
+  elif [ "$TEMP" ];then
+    export tmp_dir=$TEMP
+  elif [ -w /tmp/$USER ];then
+    export tmp_dir=/tmp
+  elif [ -w /tmp ];then
+    mkdir -p /tmp/$USER
+    export tmp_dir=/tmp/$USER
+  else
+    mkdir -p ~/tmp
+    export tmp_dir=~/tmp
+  fi
+fi
+f_mcpoponsc_n=$tmp_dir/mcpoponsc_n
+f_nclbs=$tmp_dir/f_nclbs
+f_clbs_prefix=$tmp_dir/f_clbs_
+mcpoponsc_n=0
+nclbs=0
+
 # Application to sent the clipboard to the OS's clipboard
 # to be used for "-x" option
 if [ "$CLXOS" != "" ];then
@@ -319,8 +342,7 @@ function mcpoponsc_messaage { # {{{
   # Note: Message line can show only 512 characters.
   # If more than 512 characters were given to the message line,
   # the message can't be correctly shown (and overflows will appear in the window)
-  #printf "\e^n/p(next/prev) q(quit) Space(select) %2d: $clbshow\e\\" $mcpoponsc_n
-  screen -X echo '$mcpoponsc_n/$nclbs: $clb_'$((mcpoponsc_n))
+  screen -X echo "$((mcpoponsc_n+1))/$nclbs: $(cat ${f_clbs_prefix}${mcpoponsc_n})"
 } # }}}
 
 function mcpoponsc { # {{{
@@ -334,63 +356,59 @@ function mcpoponsc { # {{{
     return $ret
   fi
 
-  screen -X setenv nclbs $_s_n
+  nclbs=$_s_n
+  echo $nclbs > $f_nclbs
   local i
   for ((i=0; i<$_s_n; i++));do
     # screen's command must be less than 512 in total, including setenv ....
     # Therefore stored value should be much shorter 512.
     local clbshow="${_s_inputs[$i]: 0: 480}"
-    screen -X setenv "clb_${i}" "$clbshow"
+    echo "$clbshow" > ${f_clbs_prefix}${i}
   done
 
-  # mcpoponsc_n starts from 0
-  # It is better to use same number for printing in mcpoponsc_messaage,
-  # because setenv command also show a message in a short time.
-  # If they are different, there will be ugly flash.
-  # Then, in message, mcpoponsc_n+1 is used.
   mcpoponsc_n=0
-  screen -X setenv mcpoponsc_n $mcpoponsc_n
+  echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
   screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_next { # {{{
   screen -X msgminwait 0
-  local mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  local nclbs=$(screen -Q echo '$nclbs')
+  mcpoponsc_n=$(cat $f_mcpoponsc_n)
+  nclbs=$(cat $f_nclbs)
   if [ $mcpoponsc_n -eq 0 ];then
     mcpoponsc_n=$((nclbs-1))
   else
     ((mcpoponsc_n--))
   fi
-  screen -X setenv mcpoponsc_n $mcpoponsc_n
+  echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
   screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_prev { # {{{
   screen -X msgminwait 0
-  local mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
-  local nclbs=$(screen -Q echo '$nclbs')
+  mcpoponsc_n=$(cat $f_mcpoponsc_n)
+  nclbs=$(cat $f_nclbs)
   if [ $mcpoponsc_n -eq $((nclbs-1)) ];then
     mcpoponsc_n=0
   else
     ((mcpoponsc_n++))
   fi
-  screen -X setenv mcpoponsc_n $mcpoponsc_n
+  echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
   screen -X msgminwait $msgminwait
 } # }}}
 
 function mcpoponsc_quit { # {{{
   screen -X msgminwait 0
-  local nclbs=$(screen -Q echo '$nclbs')
+  local nclbs=$(cat $f_clbs)
   local i
   for ((i=0; i<$nclbs; i++));do
-    screen -X unsetenv clb_$i
+    rm -f ${f_clbs_prefix}${i}
   done
-  screen -X unsetenv mcpoponsc_n
-  screen -X unsetenv nclbs
+  rm -f $mcpoponsc_n
+  rm -f $nclbs
   screen -X msgminwait $msgminwait
 } # }}}
 
@@ -405,7 +423,7 @@ function mcpoponsc_select { # {{{
     return $ret
   fi
 
-  mcpoponsc_n=$(screen -Q echo '$mcpoponsc_n')
+  mcpoponsc_n=$(cat '$f_mcpoponsc_n')
 
   # Copy to clipboard of X
   mccopy2cl "${_s_inputs[$mcpoponsc_n]}"
@@ -497,7 +515,7 @@ _sf_check_args () { # {{{
   fi
   if [ "$1" = "-h" ];then
     shift
-    echo "$_s_help" >/dev/tty
+    echo "$_s_help"|${PAGER:-less} >/dev/tty
   elif [ "$1" = "-s" ];then
     # pushpopsc
     shift
