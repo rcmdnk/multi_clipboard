@@ -552,8 +552,8 @@ _sf_check_args () { # {{{
     mccopy2cl "$(cat $scex)"
   elif [ "$1" = "-c" ];then
     # cleanup store file
-    echo "echo > $_s_file"
-    echo > $_s_file
+    echo "echo -n > $_s_file"
+    echo -n > $_s_file
   elif [ "$1" = "-o" ];then
     # pop
     shift
