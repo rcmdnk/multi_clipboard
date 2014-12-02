@@ -79,7 +79,7 @@ PATH is set , and write in .screenrc:
 
 ----------.screenrc---------
 # Screen exchange file
-bufferfile "\$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
+bufferfile \"\$SCREENEXCHANGE\" # SCREENEXCHANGE must be set in .bashrc !!!
 
 
 # Overwrite keys in copy mode
@@ -138,24 +138,24 @@ export SCREEN_MSGMINWAIT=1
 export CLIPBOARD=\$HOME/.clipboard
 export CLMAXHIST=20
 export CLSEP=\$'\x07' # \$'\x07' is BEL
-export CLX="" #xsel/xclip
-if [[ "\$OSTYPE" =~ "linux" ]];then
+export CLX=\"\" #xsel/xclip
+if [[ \"\$OSTYPE\" =~ linux ]];then
   if which -s xsel;then
-    export CLXOS="xsel"
+    export CLXOS=\"xsel\"
   elif which -s xsel;then
-    export CLXOS="xclip"
+    export CLXOS=\"xclip\"
   fi
-elif [[ "\$OSTYPE" =~ "cygwin" ]];then
+elif [[ \"\$OSTYPE\" =~ cygwin ]];then
   if which -s putclip;then
-    export CLXOS="putclip"
+    export CLXOS=\"putclip\"
   elif which -s xsel;then
-    export CLXOS="xsel"
+    export CLXOS=\"xsel\"
   elif which -s xsel;then
-    export CLXOS="xclip"
+    export CLXOS=\"xclip\"
   fi
-elif [[ "\$OSTYPE" =~ "darwin" ]];then
+elif [[ \"\$OSTYPE\" =~ darwin ]];then
   if which -s pbcopy;then
-    export CLXOS="pbcopy"
+    export CLXOS=\"pbcopy\"
   fi
 fi
 ----------.bashrc---------
@@ -218,10 +218,10 @@ if [ ! "$tmp_DIR" ];then
     export tmp_dir=$TMP
   elif [ "$TEMP" ];then
     export tmp_dir=$TEMP
-  elif [ -w /tmp/$USER ];then
+  elif [ -w "/tmp/$USER" ];then
     export tmp_dir=/tmp
   elif [ -w /tmp ];then
-    mkdir -p /tmp/$USER
+    mkdir -p "/tmp/$USER"
     export tmp_dir=/tmp/$USER
   else
     mkdir -p ~/tmp
@@ -238,13 +238,13 @@ nclbs=0
 # to be used for "-x" option
 if [ "$CLXOS" != "" ];then
   clxos=${CLXOS}
-elif [[ "$OSTYPE" =~ "linux" ]];then
+elif [[ "$OSTYPE" =~ linux ]];then
   if which xsel >/dev/null 2>&1;then
     clxos="xsel"
   elif which xsel >/dev/null 2>&1;then
     clxos="xclip"
   fi
-elif [[ "$OSTYPE" =~ "cygwin" ]];then
+elif [[ "$OSTYPE" =~ cygwin ]];then
   if which putclip >/dev/null 2>&1;then
     clxos="putclip"
   elif which xsel >/dev/null 2>&1;then
@@ -252,7 +252,7 @@ elif [[ "$OSTYPE" =~ "cygwin" ]];then
   elif which xsel >/dev/null 2>&1;then
     clxos="xclip"
   fi
-elif [[ "$OSTYPE" =~ "darwin" ]];then
+elif [[ "$OSTYPE" =~ darwin ]];then
   if which pbcopy >/dev/null 2>&1;then
     clxos="pbcopy"
   fi
@@ -283,7 +283,7 @@ function mcpop { # {{{
   echo >/dev/tty
   for((i=$((_s_n-1)); i>=0; i--));do
     local clbshow="${_s_inputs[$i]}"
-    if [ $(echo "${clbshow}"|wc -l) -ge 3 ];then
+    if [ "$(echo "${clbshow}"|wc -l)" -ge 3 ];then
       clbshow="$(echo "${clbshow}"|head -n2)
 ..."
     fi
@@ -314,7 +314,7 @@ function mcpop { # {{{
 
   # Align clipboards
   if [ "$_s_file" = "$clb" ];then
-    _sf_align_values $n 0
+    _sf_align_values "$n" 0
   fi
 } # }}}
 
@@ -328,10 +328,10 @@ function mcpopsc { # {{{
     return $ret
   fi
 
-  echo -en "${_s_inputs[0]}" > $scex
+  echo -en "${_s_inputs[0]}" > "$scex"
   screen -X readbuf
-  printf "\e^Clipbaord: ${_s_inputs[0]: 0:480}\e\\"
-  screen -X msgminwait $msgminwait
+  printf "\e^Clipbaord: %s\e\\" "${_s_inputs[0]: 0:480}"
+  screen -X msgminwait "$msgminwait"
 } # }}}
 
 function mcpoponsc_messaage { # {{{
@@ -353,9 +353,9 @@ function mcpoponsc { # {{{
   fi
 
   nclbs=$_s_n
-  echo $nclbs > $f_nclbs
+  echo "$nclbs" > "$f_nclbs"
   local i
-  for ((i=0; i<$_s_n; i++));do
+  for ((i=0; i<_s_n; i++));do
     # screen's command must be less than 512 in total, including setenv ....
     # Therefore stored value should be much shorter 512.
     local clbshow="${_s_inputs[$i]: 0: 480}"
@@ -365,47 +365,47 @@ function mcpoponsc { # {{{
   mcpoponsc_n=0
   echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
-  screen -X msgminwait $msgminwait
+  screen -X msgminwait "$msgminwait"
 } # }}}
 
 function mcpoponsc_next { # {{{
   screen -X msgminwait 0
   mcpoponsc_n=$(cat $f_mcpoponsc_n)
   nclbs=$(cat $f_nclbs)
-  if [ $mcpoponsc_n -eq 0 ];then
+  if [ "$mcpoponsc_n" -eq 0 ];then
     mcpoponsc_n=$((nclbs-1))
   else
     ((mcpoponsc_n--))
   fi
   echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
-  screen -X msgminwait $msgminwait
+  screen -X msgminwait "$msgminwait"
 } # }}}
 
 function mcpoponsc_prev { # {{{
   screen -X msgminwait 0
   mcpoponsc_n=$(cat $f_mcpoponsc_n)
   nclbs=$(cat $f_nclbs)
-  if [ $mcpoponsc_n -eq $((nclbs-1)) ];then
+  if [ "$mcpoponsc_n" -eq $((nclbs-1)) ];then
     mcpoponsc_n=0
   else
     ((mcpoponsc_n++))
   fi
   echo $mcpoponsc_n > $f_mcpoponsc_n
   mcpoponsc_messaage
-  screen -X msgminwait $msgminwait
+  screen -X msgminwait "$msgminwait"
 } # }}}
 
 function mcpoponsc_quit { # {{{
   screen -X msgminwait 0
-  local nclbs=$(cat $f_clbs)
+  local nclbs=$(cat "$f_clbs")
   local i
-  for ((i=0; i<$nclbs; i++));do
+  for ((i=0; i<nclbs; i++));do
     rm -f ${f_clbs_prefix}${i}
   done
-  rm -f $mcpoponsc_n
-  rm -f $nclbs
-  screen -X msgminwait $msgminwait
+  rm -f "$mcpoponsc_n"
+  rm -f "$nclbs"
+  screen -X msgminwait "$msgminwait"
 } # }}}
 
 function mcpoponsc_select { # {{{
@@ -419,7 +419,7 @@ function mcpoponsc_select { # {{{
     return $ret
   fi
 
-  mcpoponsc_n=$(cat '$f_mcpoponsc_n')
+  mcpoponsc_n=$(cat "$f_mcpoponsc_n")
 
   # Copy to clipboard of X
   mccopy2cl "${_s_inputs[$mcpoponsc_n]}"
@@ -427,7 +427,7 @@ function mcpoponsc_select { # {{{
 
   # Align clipboards
   if [ "$_s_file" = "$clb" ];then
-    _sf_align_values $mcpoponsc_n 0
+    _sf_align_values "$mcpoponsc_n" 0
   fi
 
   # Finalize
@@ -436,13 +436,13 @@ function mcpoponsc_select { # {{{
   # Pop Clipboard
   mcpopsc
 
-  screen -X msgminwait $msgminwait
+  screen -X msgminwait "$msgminwait"
 
   screen -X echo "Clipboard: ${clb_n}"
 } # }}}
 
 _sf_set_header () { # {{{
-  if [ $_s_noheader -eq 1 -o $_s_lines -lt 10 -o $_s_cols -lt 60 ];then
+  if [ "$_s_noheader" -eq 1 -o "$_s_lines" -lt 10 -o "$_s_cols" -lt 60 ];then
     return
   elif [ "$_s_file" = "$clb" ];then
     _s_header=" $_s_n clipboards in total
@@ -545,15 +545,15 @@ _sf_check_args () { # {{{
   elif [ "$1" = "-I" ];then
     # pushsc
     shift
-    touch $scex
+    touch "$scex"
     screen -X writebuf
     _s_noshow=1
-    _sf_push "$(cat $scex)"
-    mccopy2cl "$(cat $scex)"
+    _sf_push "$(cat "$scex")"
+    mccopy2cl "$(cat "$scex")"
   elif [ "$1" = "-c" ];then
     # cleanup store file
     echo "echo -n > $_s_file"
-    echo -n > $_s_file
+    echo -n > "$_s_file"
   elif [ "$1" = "-o" ];then
     # pop
     shift
