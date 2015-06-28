@@ -3,7 +3,7 @@ multi_clipboard
 
 Clipboard manager for GNU screen.
 
-# Installation
+## Installation
 
 :white_check_mark: current version requires [sentaku](https://github.com/rcmdnk/sentaku).
 
@@ -13,7 +13,7 @@ Please install sentaku or use
 [standalone version](https://github.com/rcmdnk/multi_clipboard/tree/standalone)
 (standalone version could be obsolete).
 
-## cURL
+### cURL
 
 You can use an install script on the web like:
 
@@ -26,7 +26,7 @@ If you want to install other directory, do like:
 
     $ curl -fsSL https://raw.github.com/rcmdnk/multi_clipboard/install/install.sh|  prefix=~/usr/local/ sh
 
-## Homebrew at OS X
+### Homebrew at OS X
 
 On Mac, you can install scripts by [Homebrew](https://github.com/mxcl/homebrew):
 
@@ -49,16 +49,16 @@ Or if you write like:
 and do `brew file install`, you will have all useful scripts in
 [rcmdnkpac](https://github.com/rcmdnk/homebrew-rcmdnkpac).
 
-## Download
+### Download
 
 Or, simply download scripts and set where you like.
 
 :warning: Install [sentaku](https://github.com/rcmdnk/sentaku), too.
 
 
-# Setup
+## Setup
 
-## Setup for GNU screen
+### Setup for GNU screen
 
 Add following lines to `.screenrc`
 
@@ -125,7 +125,7 @@ In addition, you can put the clipboard to snippet by `s`.
 
 
 
-## Setup in .bashrc
+### Setup in .bashrc
 
 Add following lines to `.bashrc`.
 
@@ -165,7 +165,7 @@ Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
          Therefore, you don't need to set SCREEN_MSGMINWAIT
          unless you set msgminwait in .screenrc.
 
-# Usage
+## Usage
 
 In screen, it automatically add new clipboard in the list.
 You can call them from command line by calling multi_clipboard w/o arguments:
@@ -232,7 +232,7 @@ Other command line usages are here:
     $ multi_clipboard -h
     # Show this usage
 
-# Snippet
+## Snippet
 
 You can use multi_clipboard as snippet manager in addition to clipboard manager.
 
@@ -248,7 +248,7 @@ You can put clipboard to snippet from selection window of clipboard
 (push `s` on the clipboard which you want to put into snippet).
 
 
-# References
+## References
 
 * [GNU screenでクリップボードの履歴を使えるようにする](http://rcmdnk.github.io/blog/2013/03/24/screen-bash/)
 * [GNU screenでクリップボードの履歴を使えるようにする 2](http://rcmdnk.github.io/blog/2013/12/04/computer-screen/)
