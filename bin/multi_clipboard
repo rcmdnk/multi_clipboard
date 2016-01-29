@@ -281,7 +281,8 @@ function mcpop { # {{{
   fi
 
   echo >/dev/tty
-  for((i=$((_s_n-1)); i>=0; i--));do
+  local i
+  for i in $(seq $((_s_n-1)) 0);do
     local clbshow="${_s_inputs[$i]}"
     if [ "$(echo "${clbshow}"|wc -l)" -ge 3 ];then
       clbshow="$(echo "${clbshow}"|head -n2)
@@ -355,7 +356,7 @@ function mcpoponsc { # {{{
   nclbs=$_s_n
   echo "$nclbs" > "$f_nclbs"
   local i
-  for ((i=0; i<_s_n; i++));do
+  for i in $(seq 0 $((_s_n-1)));do
     # screen's command must be less than 512 in total, including setenv ....
     # Therefore stored value should be much shorter 512.
     local clbshow="${_s_inputs[$i]: 0: 480}"
@@ -400,7 +401,7 @@ function mcpoponsc_quit { # {{{
   screen -X msgminwait 0
   local nclbs=$(cat "$f_clbs")
   local i
-  for ((i=0; i<nclbs; i++));do
+  for i in $(seq 0 $((nclbs-1)));do
     rm -f ${f_clbs_prefix}${i}
   done
   rm -f "$mcpoponsc_n"
