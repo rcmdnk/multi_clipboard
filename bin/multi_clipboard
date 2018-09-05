@@ -175,7 +175,7 @@ Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
 
 # Source sentaku {{{
 if ! type sentaku >& /dev/null ;then
-  echo "sd_cl needs sentaku"
+  echo "multi_clipboard needs sentaku"
   echo "Please install: https://github.com/rcmdnk/sentaku"
   exit 1
 fi
