@@ -284,7 +284,7 @@ function mcpop { # {{{
   local i
   for i in $(seq $((_s_n-1)) 0);do
     local clbshow="${_s_inputs[$i]}"
-    if [ "$(echo "${clbshow}"|wc -l)" -ge 3 ];then
+    if [ "$(echo "${clbshow}"|grep -c ^)" -ge 3 ];then
       clbshow="$(echo "${clbshow}"|head -n2)
 ..."
     fi
