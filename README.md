@@ -66,9 +66,9 @@ Add following lines to `.screenrc`
     bufferfile "$SCREENEXCHANGE" # SCREENEXCHANGE must be set in .bashrc !!!
 
     # Overwrite keys in copy mode
-    bindkey -m ' ' eval 'stuff \040' 'writebuf' 'exec !!! multi_clipboard -I'
-    bindkey -m Y eval 'stuff Y' 'writebuf' 'exec !!! multi_clipboard -I'
-    bindkey -m W eval 'stuff W' 'writebuf' 'exec !!! multi_clipboard -I'
+    bindkey -m ' ' eval 'stuff \040' 'exec !!! multi_clipboard -I'
+    bindkey -m Y eval 'stuff Y' 'exec !!! multi_clipboard -I'
+    bindkey -m W eval 'stuff W' 'exec !!! multi_clipboard -I'
 
     # Selection mode
     # C-a a : default is meta (Send the command character (C-a) to window.)
