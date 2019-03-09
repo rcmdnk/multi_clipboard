@@ -547,7 +547,6 @@ _sf_check_args () { # {{{
     # pushsc
     shift
     touch "$scex"
-    sleep 1
     screen -X writebuf
     _s_noshow=1
     _sf_push "$(cat "$scex")"
