@@ -241,7 +241,7 @@ if [ "$CLXOS" != "" ];then
 elif [[ "$OSTYPE" =~ linux ]];then
   if which xsel >/dev/null 2>&1;then
     clxos="xsel"
-  elif which xsel >/dev/null 2>&1;then
+  elif which xclip >/dev/null 2>&1;then
     clxos="xclip"
   fi
 elif [[ "$OSTYPE" =~ cygwin ]];then
@@ -249,7 +249,7 @@ elif [[ "$OSTYPE" =~ cygwin ]];then
     clxos="putclip"
   elif which xsel >/dev/null 2>&1;then
     clxos="xsel"
-  elif which xsel >/dev/null 2>&1;then
+  elif which xclip >/dev/null 2>&1;then
     clxos="xclip"
   fi
 elif [[ "$OSTYPE" =~ darwin ]];then
