@@ -266,7 +266,7 @@ msgminwait="${SCREEN_MSGMINWAIT:-1}"
 function mccopy2cl { # {{{
   # Copy to clipboard of X
   if [ "$clx" != "" ];then
-    echo -en "$@" | $clx
+    echo -en "$*" | $clx
   fi
 } # }}}
 
@@ -506,6 +506,7 @@ _sf_execute () { # {{{
 _sf_check_args () { # {{{
 
   _s_continue=0
+  _s_use_file=1
   if [ "$1" = "snippet" ];then
     _s_file=$snp
     shift
@@ -516,8 +517,8 @@ _sf_check_args () { # {{{
   elif [ "$1" = "-s" ];then
     # pushpopsc
     shift
-    _sf_push "$@"
-    mccopy2cl "$@"
+    _sf_push "$*"
+    mccopy2cl "${_s_inputs[0]}"
     mcpopsc
   elif [ "$1" = "-S" ];then
     # poponsc
@@ -541,8 +542,8 @@ _sf_check_args () { # {{{
   elif [ "$1" = "-i" ];then
     # push
     shift
-    _sf_push "$@"
-    mccopy2cl "$@"
+    _sf_push "$*"
+    mccopy2cl "${_s_inputs[0]}"
   elif [ "$1" = "-I" ];then
     # pushsc
     shift
