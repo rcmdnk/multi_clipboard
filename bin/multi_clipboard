@@ -35,20 +35,23 @@ _s_help="
 Usage:
 
     $ multi_clipboard -i [args]
-    # Push [args] to the clipboard list
+    # Insert [args] to the clipboard list
 
     $ multi_clipboard -s [args]
     # Send [args] to the clipboard list and the screen's clipboard
 
     $ multi_clipboard -I
-    # Push the screen's clipboard to the clipboard list
+    # Insert the screen's clipboard to the clipboard list
 
     $ multi_clipboard -o
-    # Will show the clipboard list, then select one, which will be placed
+    # Open clipboard list, then select one, which will be placed
     # the top of the clipboard list.
 
     $ multi_clipboard -O
     # Same as -o, in addition, send it to the screen's clipboard
+
+    $ multi_clipboard -g
+    # Get the first one in the clipboard list
 
     $ multi_clipboard -w # or w/o any other options
     # Launch selection window
@@ -566,13 +569,16 @@ _sf_check_args () { # {{{
   elif [ "$1" = "-h" ];then
     shift
     _sf_help
+  elif [ "$1" = "-g" ];then
+    shift
+    _s_noshow=1
+    _s_current_n=0
+    _s_continue=1
   elif [ "$1" = "-W" ];then
-    # mcpopwindow for screen
     shift
     _s_continue=1
     _s_is_sc=1
   else # -w or else
-    # mcpopwindow
     _s_continue=1
   fi
 } # }}}
