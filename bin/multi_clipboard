@@ -500,7 +500,7 @@ _sf_execute () { # {{{
   if [ $_s_is_sc -eq 1 ];then
     mcpopsc
   else
-    echo "${_s_inputs[0]}"
+    printf "${_s_inputs[0]}"
   fi
   mccopy2cl "${_s_inputs[0]}"
   _s_align=0
