@@ -134,26 +134,6 @@ Add following lines to `.bashrc`.
     export CLIPBOARD=$HOME/.clipboard
     export CLMAXHIST=20
     export CLSEP=$'\x07' # $'\x07' is BEL
-    export CLX="" #xsel/xclip
-    if [[ "$OSTYPE" =~ "linux" ]];then
-      if which -s xsel;then
-        export CLXOS="xsel"
-      elif which -s xsel;then
-        export CLXOS="xclip"
-      fi
-    elif [[ "$OSTYPE" =~ "cygwin" ]];then
-      if which -s putclip;then
-        export CLXOS="putclip"
-      elif which -s xsel;then
-        export CLXOS="xsel"
-      elif which -s xsel;then
-        export CLXOS="xclip"
-      fi
-    elif [[ "$OSTYPE" =~ "darwin" ]];then
-      if which -s pbcopy;then
-        export CLXOS="pbcopy"
-      fi
-    fi
 
 Note 1): SCREENEXCHANGE must be set in .bashrc
          or you must remove the bufferfile definition line from .screenrc

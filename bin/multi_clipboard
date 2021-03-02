@@ -141,26 +141,6 @@ export SCREEN_MSGMINWAIT=1
 export CLIPBOARD=\$HOME/.clipboard
 export CLMAXHIST=20
 export CLSEP=\$'\x07' # \$'\x07' is BEL
-export CLX=\"\" #xsel/xclip
-if [[ \"\$OSTYPE\" =~ linux ]];then
-  if which -s xsel;then
-    export CLXOS=\"xsel\"
-  elif which -s xsel;then
-    export CLXOS=\"xclip\"
-  fi
-elif [[ \"\$OSTYPE\" =~ cygwin ]];then
-  if which -s putclip;then
-    export CLXOS=\"putclip\"
-  elif which -s xsel;then
-    export CLXOS=\"xsel\"
-  elif which -s xsel;then
-    export CLXOS=\"xclip\"
-  fi
-elif [[ \"\$OSTYPE\" =~ darwin ]];then
-  if which -s pbcopy;then
-    export CLXOS=\"pbcopy\"
-  fi
-fi
 ----------.bashrc---------
 
 
@@ -246,6 +226,8 @@ elif [[ "$OSTYPE" =~ linux ]];then
     clxos="xsel"
   elif which xclip >/dev/null 2>&1;then
     clxos="xclip"
+  elif which clip.exe >/dev/null 2>&1;then
+    clxos="clip.exe"
   fi
 elif [[ "$OSTYPE" =~ cygwin ]];then
   if which putclip >/dev/null 2>&1;then
