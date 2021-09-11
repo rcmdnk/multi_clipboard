@@ -34,11 +34,11 @@
 _s_help="
 Usage:
 
-    $ multi_clipboard -i [args]
-    # Insert [args] to the clipboard list
+    $ multi_clipboard -i <args>
+    # Insert <args> to the clipboard list
 
-    $ multi_clipboard -s [args]
-    # Send [args] to the clipboard list and the screen's clipboard
+    $ multi_clipboard -s <args>
+    # Send <args> to the clipboard list and the screen's clipboard
 
     $ multi_clipboard -I
     # Insert the screen's clipboard to the clipboard list
@@ -69,6 +69,9 @@ Usage:
 
     $ multi_clipboard -S
     # Use in screen for selection mode (for screen binding, not for command line, see below)
+
+    $ multi_clipboard -C
+    # Get OS's clipboard
 
     $ multi_clipboard snippet [option]
     # Use 'snippet' file instead of saved clipboards.
@@ -219,28 +222,34 @@ nclbs=0
 
 # Application to sent the clipboard to the OS's clipboard
 # to be used for "-x" option
+function msgetclx {
+  local clx
+  if [[ "$OSTYPE" =~ linux ]];then
+    if which xsel >/dev/null 2>&1;then
+      clx="xsel"
+    elif which xclip >/dev/null 2>&1;then
+      clx="xclip"
+    elif which clip.exe >/dev/null 2>&1;then
+      clx="clip.exe"
+    fi
+  elif [[ "$OSTYPE" =~ cygwin ]];then
+    if which putclip >/dev/null 2>&1;then
+      clx="putclip"
+    elif which xsel >/dev/null 2>&1;then
+      clx="xsel"
+    elif which xclip >/dev/null 2>&1;then
+      clx="xclip"
+    fi
+  elif [[ "$OSTYPE" =~ darwin ]];then
+    if which pbcopy >/dev/null 2>&1;then
+      clx="pbcopy"
+    fi
+  fi
+  echo $clx
+}
+
 if [ "$CLXOS" != "" ];then
-  clxos=${CLXOS}
-elif [[ "$OSTYPE" =~ linux ]];then
-  if which xsel >/dev/null 2>&1;then
-    clxos="xsel"
-  elif which xclip >/dev/null 2>&1;then
-    clxos="xclip"
-  elif which clip.exe >/dev/null 2>&1;then
-    clxos="clip.exe"
-  fi
-elif [[ "$OSTYPE" =~ cygwin ]];then
-  if which putclip >/dev/null 2>&1;then
-    clxos="putclip"
-  elif which xsel >/dev/null 2>&1;then
-    clxos="xsel"
-  elif which xclip >/dev/null 2>&1;then
-    clxos="xclip"
-  fi
-elif [[ "$OSTYPE" =~ darwin ]];then
-  if which pbcopy >/dev/null 2>&1;then
-    clxos="pbcopy"
-  fi
+  clxos=${CLXOS:-$(msgetclx)}
 fi
 
 # Default msgminwait
@@ -560,6 +569,9 @@ _sf_check_args () { # {{{
     shift
     _s_continue=1
     _s_is_sc=1
+  elif [ "$1" = "-C" ];then
+    shift
+    echo $(msgetclx)
   else # -w or else
     _s_continue=1
   fi
