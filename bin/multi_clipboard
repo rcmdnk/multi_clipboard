@@ -225,12 +225,12 @@ nclbs=0
 function msgetclx {
   local clx
   if [[ "$OSTYPE" =~ linux ]];then
-    if which xsel >/dev/null 2>&1;then
+    if which clip.exe >/dev/null 2>&1;then
+      clx="clip.exe"
+    elif which xsel >/dev/null 2>&1;then
       clx="xsel"
     elif which xclip >/dev/null 2>&1;then
       clx="xclip"
-    elif which clip.exe >/dev/null 2>&1;then
-      clx="clip.exe"
     fi
   elif [[ "$OSTYPE" =~ cygwin ]];then
     if which putclip >/dev/null 2>&1;then
