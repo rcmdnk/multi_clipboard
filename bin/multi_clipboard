@@ -159,15 +159,6 @@ Note 2): SCREEN_MSGMINWAIT is used to revert msgminwait in screen
 "
 # }}}
 
-# Source sentaku {{{
-if ! type sentaku >& /dev/null ;then
-  echo "multi_clipboard needs sentaku"
-  echo "Please install: https://github.com/rcmdnk/sentaku"
-  exit 1
-fi
-source sentaku -n
-# }}}
-
 # Set variables {{{
 # Following variables can be set in .bashrc or else
 #
@@ -247,6 +238,23 @@ function msgetclx {
   fi
   echo $clx
 }
+
+# Exit here for -C before loading sentaku (to be used in non TERM environment)
+if [ "$1" = "-C" ];then
+  shift
+  echo $(msgetclx)
+  exit
+fi
+
+# Source sentaku {{{
+if ! type sentaku >& /dev/null ;then
+  echo "multi_clipboard needs sentaku"
+  echo "Please install: https://github.com/rcmdnk/sentaku"
+  exit 1
+fi
+source sentaku -n
+# }}}
+
 
 if [ "$CLXOS" != "" ];then
   clxos=${CLXOS:-$(msgetclx)}
@@ -569,9 +577,6 @@ _sf_check_args () { # {{{
     shift
     _s_continue=1
     _s_is_sc=1
-  elif [ "$1" = "-C" ];then
-    shift
-    echo $(msgetclx)
   else # -w or else
     _s_continue=1
   fi
